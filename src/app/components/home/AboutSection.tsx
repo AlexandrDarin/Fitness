@@ -32,7 +32,7 @@ export function AboutSection() {
             <span className="text-sm text-primary">О клубе</span>
           </div>
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-            Почему выбирают ECO FITNESS
+            Почему выбирают Wire Fitness
           </h2>
           <p className="text-lg text-muted-foreground">
             Мы создали пространство, где каждый найдёт мотивацию для достижения своих целей. 

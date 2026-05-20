@@ -89,10 +89,6 @@ export function ScheduleSection() {
             </div>
           ))}
         </div>
-
-        <div className="text-center mt-12">
-          <Button size="lg" variant="outline">Полное расписание</Button>
-        </div>
       </div>
 
       {successModal.open && (

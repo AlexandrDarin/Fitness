@@ -19,13 +19,10 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <Header />
       <main>
-        <HeroSection 
-          onScrollToMemberships={() => scrollToSection('memberships')}
-          onScrollToTour={() => scrollToSection('tour')}
-        />
+        <HeroSection onScrollToMemberships={() => scrollToSection('memberships')} />
         <AboutSection />
         <DirectionsSection />
         <TrainersSection />

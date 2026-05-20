@@ -17,7 +17,7 @@ export function DirectionsSection() {
       title: "Тренажёрный зал",
       description: "Современное оборудование для силовых и кардио тренировок",
       fullDescription: "Наш тренажёрный зал оснащён самым современным оборудованием от ведущих мировых производителей. Просторные зоны для кардио и силовых тренировок позволяют комфортно заниматься в любое время.",
-      image: "https://yaart-web-alice-images.s3.yandex.net/1c88431d31c611f1b10192ae4ac67c08:1",
+      image: "https://yaart-web-alice-images.s3.yandex.net/13d89a9f542911f1af87dedad3e518de:1",
       features: [
         "Более 50 единиц силового оборудования",
         "30+ кардиотренажёров",
@@ -31,7 +31,7 @@ export function DirectionsSection() {
       title: "Групповые тренировки",
       description: "Более 30 видов групповых занятий на любой вкус",
       fullDescription: "В нашем фитнес-клубе представлено более 30 направлений групповых программ: от энергичных танцевальных классов до спокойной йоги.",
-      image: "https://yaart-web-alice-images.s3.yandex.net/49239f6631c411f18a808a6f7de8e7cb:1",
+      image: "https://yaart-web-alice-images.s3.yandex.net/3e93602e542911f1952e22bdcf9e15b8:2",
       features: [
         "30+ направлений на выбор",
         "Опытные инструкторы",
@@ -45,7 +45,7 @@ export function DirectionsSection() {
       title: "Единоборства",
       description: "Бокс, кикбоксинг, MMA с профессиональными тренерами",
       fullDescription: "Зал единоборств оснащён профессиональными рингами, грушами, мешками и всем необходимым оборудованием.",
-      image: "https://yaart-web-alice-images.s3.yandex.net/1b97753c31c411f182fb2addd6357329:1",
+      image: "https://yaart-web-alice-images.s3.yandex.net/7273b7b0542911f18f99f2d8a0c99347:1",
       features: [
         "Бокс, кикбоксинг, MMA",
         "Ринг и зона с мешками",
@@ -59,7 +59,7 @@ export function DirectionsSection() {
       title: "Йога и пилатес",
       description: "Гармония тела и разума в специально оборудованных залах",
       fullDescription: "Светлые, просторные залы с панорамными окнами создают идеальную атмосферу для практики йоги и пилатеса.",
-      image: "https://yaart-web-alice-images.s3.yandex.net/f1d4a49731c311f1b7e21e89f93961fd:1",
+      image: "https://yaart-web-alice-images.s3.yandex.net/a2f7d424542911f1aabb3e778ec87452:1",
       features: [
         "10+ видов йоги",
         "Пилатес на реформерах",
@@ -73,7 +73,7 @@ export function DirectionsSection() {
       title: "Бассейн",
       description: "25-метровый бассейн с подогревом и аквааэробика",
       fullDescription: "Просторный 25-метровый бассейн с 6 дорожками, комфортная температура воды 27-28°C.",
-      image: "https://yaart-web-alice-images.s3.yandex.net/a53c2ede31c211f192abfa3eba52b8fb:1",
+      image: "https://yaart-web-alice-images.s3.yandex.net/bb05e5bc542911f1815dc6d8f4207592:1",
       features: [
         "25 метров, 6 дорожек",
         "Температура воды 27-28°C",
@@ -87,7 +87,7 @@ export function DirectionsSection() {
       title: "SPA-зона",
       description: "Сауна, хаммам, массаж для полного восстановления",
       fullDescription: "Роскошная SPA-зона для полного расслабления после тренировок. Финская сауна, турецкий хаммам, массаж.",
-      image: "https://yaart-web-alice-images.s3.yandex.net/1a454e9931c211f1a442be4dae8ccf49:1",
+      image: "https://yaart-web-alice-images.s3.yandex.net/d696e90d542911f1bc95ce9a942b3bc4:1",
       features: [
         "Финская сауна",
         "Турецкий хаммам",
@@ -101,7 +101,7 @@ export function DirectionsSection() {
       title: "Кроссфит",
       description: "Функциональный тренинг для максимальных результатов",
       fullDescription: "Специализированная зона для кроссфита с профессиональным оборудованием.",
-      image: "https://yaart-web-alice-images.s3.yandex.net/927f48dc31c311f1982d864982c6637a:1",
+      image: "https://yaart-web-alice-images.s3.yandex.net/e99429ea542911f1905c82618675ee7d:1",
       features: [
         "Полный набор оборудования",
         "WOD разной сложности",
@@ -115,7 +115,7 @@ export function DirectionsSection() {
       title: "Детский клуб",
       description: "Программы развития и тренировки для детей от 3 лет",
       fullDescription: "Детский клуб с профессиональными педагогами и тренерами. Программы развития: ОФП, плавание, гимнастика.",
-      image: "https://yaart-web-alice-images.s3.yandex.net/d445a89e31c311f1b83e36e844118f87:1",
+      image: "https://yaart-web-alice-images.s3.yandex.net/00c56c96542a11f1b508dec16a0cd269:1",
       features: [
         "Дети от 3 до 15 лет",
         "ОФП и общеразвивающие программы",

@@ -20,7 +20,6 @@ import {
 import { toast } from 'sonner';
 
 interface AppContextType {
-  // Data
   users: User[];
   memberships: Membership[];
   trainings: Training[];
@@ -30,32 +29,32 @@ interface AppContextType {
   trainers: Trainer[];
   promotions: Promotion[];
   
-  // Booking actions
   createBooking: (userId: string, trainingId: string) => Promise<boolean>;
   cancelBooking: (bookingId: string) => Promise<boolean>;
-  
-  // Training actions
   updateTrainingStatus: (trainingId: string, status: Training['status']) => void;
   markAttendance: (bookingId: string, attended: boolean) => Promise<boolean>;
-  
-  // Membership actions
   purchaseMembership: (userId: string, type: Membership['type']) => Promise<boolean>;
-  
-  // User actions
   updateUser: (userId: string, updates: Partial<User>) => Promise<boolean>;
   createUser: (userData: Omit<User, 'id' | 'createdAt'>) => Promise<string>;
   deleteUser: (userId: string) => Promise<boolean>;
   toggleUserStatus: (userId: string) => Promise<boolean>;
   
-  // Trainer actions
-  updateTrainer: (trainerId: string, updates: Partial<Trainer>) => void;
+  addTrainer: (trainerData: Omit<Trainer, 'id'>) => Promise<string>;
+  updateTrainer: (trainerId: string, updates: Partial<Trainer>) => Promise<boolean>;
+  deleteTrainer: (trainerId: string) => Promise<boolean>;
+  assignClientToTrainer: (trainerId: string, clientId: string) => Promise<boolean>;
+  getTrainerClients: (trainerId: string) => User[];
+  getClientTrainer: (clientId: string) => Trainer | undefined;
   
-  // Promotion actions
+  addTraining: (trainingData: Omit<Training, 'id' | 'bookedSpots' | 'status'>) => Promise<string>;
+  updateTraining: (trainingId: string, updates: Partial<Training>) => Promise<boolean>;
+  deleteTraining: (trainingId: string) => Promise<boolean>;
+  getTrainerTrainings: (trainerId: string) => Training[];
+  
   createPromotion: (promotion: Omit<Promotion, 'id'>) => void;
   updatePromotion: (promotionId: string, updates: Partial<Promotion>) => void;
   deletePromotion: (promotionId: string) => void;
   
-  // Helper functions
   getUserBookings: (userId: string) => Booking[];
   getUserMembership: (userId: string) => Membership | undefined;
   getTrainingBookings: (trainingId: string) => Booking[];
@@ -73,98 +72,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [purchases, setPurchases] = useState<Purchase[]>(mockPurchases);
   const [trainers, setTrainers] = useState<Trainer[]>(mockTrainers);
   const [promotions, setPromotions] = useState<Promotion[]>(mockPromotions);
+  
+  const [trainerClients, setTrainerClients] = useState<Record<string, string[]>>({
+    '2': ['1', '6'],
+    '3': ['1'],
+    '4': ['6'],
+  });
 
-  // Booking actions
   const createBooking = useCallback(async (userId: string, trainingId: string): Promise<boolean> => {
     return new Promise((resolve) => {
       setTimeout(() => {
         const training = trainings.find(t => t.id === trainingId);
-        
-        if (!training) {
-          toast.error('Тренировка не найдена');
-          resolve(false);
-          return;
-        }
-
-        // Check if training has available spots
-        if (training.bookedSpots >= training.maxSpots) {
-          toast.error('Нет свободных мест');
-          resolve(false);
-          return;
-        }
-
-        // Check if user has active membership
-        const userMembership = memberships.find(
-          m => m.userId === userId && m.status === 'active'
-        );
-
-        if (!userMembership) {
-          toast.error('У вас нет активного абонемента', {
-            description: 'Для записи на тренировку необходимо приобрести абонемент',
-          });
-          resolve(false);
-          return;
-        }
-
-        // Check membership validity
-        const today = new Date();
-        const validUntil = new Date(userMembership.validUntil);
-        
-        if (validUntil < today) {
-          toast.error('Ваш абонемент истёк', {
-            description: 'Продлите абонемент для записи на тренировки',
-          });
-          resolve(false);
-          return;
-        }
-
-        // Check if user already has a booking
-        const existingBooking = bookings.find(
-          b => b.userId === userId && b.trainingId === trainingId && b.status === 'confirmed'
-        );
-
-        if (existingBooking) {
-          toast.error('Вы уже записаны на эту тренировку');
-          resolve(false);
-          return;
-        }
-
-        // Check visits left for basic membership
-        if (userMembership.type === 'basic' && userMembership.visitsLeft !== 'unlimited') {
-          if (userMembership.visitsLeft <= 0) {
-            toast.error('У вас закончились посещения', {
-              description: 'Продлите абонемент или приобретите новый',
-            });
-            resolve(false);
-            return;
-          }
-        }
-
-        const newBooking: Booking = {
-          id: `booking_${Date.now()}`,
-          userId,
-          trainingId,
-          status: 'confirmed',
-          bookedAt: new Date().toISOString(),
-        };
-
+        if (!training) { toast.error('Тренировка не найдена'); resolve(false); return; }
+        if (training.bookedSpots >= training.maxSpots) { toast.error('Нет свободных мест'); resolve(false); return; }
+        const userMembership = memberships.find(m => m.userId === userId && m.status === 'active');
+        if (!userMembership) { toast.error('У вас нет активного абонемента'); resolve(false); return; }
+        const existingBooking = bookings.find(b => b.userId === userId && b.trainingId === trainingId && b.status === 'confirmed');
+        if (existingBooking) { toast.error('Вы уже записаны'); resolve(false); return; }
+        const newBooking: Booking = { id: `booking_${Date.now()}`, userId, trainingId, status: 'confirmed', bookedAt: new Date().toISOString() };
         setBookings(prev => [...prev, newBooking]);
-        setTrainings(prev => prev.map(t => 
-          t.id === trainingId 
-            ? { ...t, bookedSpots: t.bookedSpots + 1 }
-            : t
-        ));
-
-        // Decrease visits for basic membership
-        if (userMembership.type === 'basic' && userMembership.visitsLeft !== 'unlimited') {
-          setMemberships(prev => prev.map(m => 
-            m.id === userMembership.id
-              ? { ...m, visitsLeft: (m.visitsLeft as number) - 1 }
-              : m
-          ));
-        }
-
-        toast.success('Вы успешно записаны на тренировку!');
+        setTrainings(prev => prev.map(t => t.id === trainingId ? { ...t, bookedSpots: t.bookedSpots + 1 } : t));
+        toast.success('Вы записаны на тренировку!');
         resolve(true);
       }, 800);
     });
@@ -174,86 +102,40 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return new Promise((resolve) => {
       setTimeout(() => {
         const booking = bookings.find(b => b.id === bookingId);
-        
-        if (!booking) {
-          toast.error('Бронирование не найдено');
-          resolve(false);
-          return;
-        }
-
-        setBookings(prev => prev.map(b => 
-          b.id === bookingId 
-            ? { ...b, status: 'cancelled', cancelledAt: new Date().toISOString() }
-            : b
-        ));
-
-        setTrainings(prev => prev.map(t => 
-          t.id === booking.trainingId 
-            ? { ...t, bookedSpots: Math.max(0, t.bookedSpots - 1) }
-            : t
-        ));
-
+        if (!booking) { toast.error('Бронирование не найдено'); resolve(false); return; }
+        setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status: 'cancelled', cancelledAt: new Date().toISOString() } : b));
+        setTrainings(prev => prev.map(t => t.id === booking.trainingId ? { ...t, bookedSpots: Math.max(0, t.bookedSpots - 1) } : t));
         toast.success('Запись отменена');
         resolve(true);
       }, 600);
     });
   }, [bookings]);
 
-  // Training actions
   const updateTrainingStatus = useCallback((trainingId: string, status: Training['status']) => {
-    setTrainings(prev => prev.map(t => 
-      t.id === trainingId ? { ...t, status } : t
-    ));
-    
-    const statusMessages = {
-      scheduled: 'Тренировка запланирована',
-      ongoing: 'Тренировка началась',
-      completed: 'Тренировка завершена',
-      cancelled: 'Тренировка отменена',
-    };
-    
-    toast.success(statusMessages[status]);
+    setTrainings(prev => prev.map(t => t.id === trainingId ? { ...t, status } : t));
+    const messages = { scheduled: 'Запланирована', ongoing: 'Началась', completed: 'Завершена', cancelled: 'Отменена' };
+    toast.success(`Тренировка ${messages[status]}`);
   }, []);
 
   const markAttendance = useCallback(async (bookingId: string, attended: boolean): Promise<boolean> => {
     return new Promise((resolve) => {
       setTimeout(() => {
         const booking = bookings.find(b => b.id === bookingId);
-        
-        if (!booking) {
-          resolve(false);
-          return;
-        }
-
-        const newStatus = attended ? 'completed' : 'missed';
-        
-        setBookings(prev => prev.map(b => 
-          b.id === bookingId ? { ...b, status: newStatus } : b
-        ));
-
+        if (!booking) { resolve(false); return; }
+        setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status: attended ? 'completed' : 'missed' } : b));
         if (attended) {
           const training = trainings.find(t => t.id === booking.trainingId);
           if (training) {
-            const newVisit: Visit = {
-              id: `visit_${Date.now()}`,
-              userId: booking.userId,
-              trainingId: booking.trainingId,
-              date: training.date,
-              time: training.time,
-              activity: training.title,
-              checkInTime: training.time,
-            };
+            const newVisit: Visit = { id: `visit_${Date.now()}`, userId: booking.userId, trainingId: booking.trainingId, date: training.date, time: training.time, activity: training.title, checkInTime: training.time };
             setVisits(prev => [...prev, newVisit]);
           }
         }
-
         toast.success(attended ? 'Посещение отмечено' : 'Отсутствие отмечено');
         resolve(true);
       }, 500);
     });
   }, [bookings, trainings]);
 
-  // Membership actions
   const purchaseMembership = useCallback(async (userId: string, type: Membership['type']): Promise<boolean> => {
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -261,47 +143,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const validFrom = new Date();
         const validUntil = new Date();
         validUntil.setDate(validUntil.getDate() + 30);
-
-        const newMembership: Membership = {
-          id: `membership_${Date.now()}`,
-          userId,
-          type,
-          validFrom: validFrom.toISOString().split('T')[0],
-          validUntil: validUntil.toISOString().split('T')[0],
-          visitsLeft: type === 'basic' ? 20 : 'unlimited',
-          status: 'active',
-          price: prices[type],
-        };
-
+        const newMembership: Membership = { id: `membership_${Date.now()}`, userId, type, validFrom: validFrom.toISOString().split('T')[0], validUntil: validUntil.toISOString().split('T')[0], visitsLeft: type === 'basic' ? 20 : 'unlimited', status: 'active', price: prices[type] };
         setMemberships(prev => [...prev, newMembership]);
-
-        const newPurchase: Purchase = {
-          id: `purchase_${Date.now()}`,
-          userId,
-          type: 'membership',
-          itemId: newMembership.id,
-          amount: prices[type],
-          date: new Date().toISOString().split('T')[0],
-          status: 'paid',
-          paymentMethod: 'Банковская карта',
-        };
-
-        setPurchases(prev => [...prev, newPurchase]);
-
-        toast.success('Абонемент успешно приобретён!');
+        toast.success('Абонемент приобретён!');
         resolve(true);
       }, 1000);
     });
   }, []);
 
-  // User actions
   const updateUser = useCallback(async (userId: string, updates: Partial<User>): Promise<boolean> => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        setUsers(prev => prev.map(u => 
-          u.id === userId ? { ...u, ...updates } : u
-        ));
-        
+        setUsers(prev => prev.map(u => u.id === userId ? { ...u, ...updates } : u));
         toast.success('Профиль обновлён');
         resolve(true);
       }, 600);
@@ -311,12 +164,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const createUser = useCallback(async (userData: Omit<User, 'id' | 'createdAt'>): Promise<string> => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const newUser: User = {
-          ...userData,
-          id: `user_${Date.now()}`,
-          createdAt: new Date().toISOString().split('T')[0],
-        };
-        
+        const newUser: User = { ...userData, id: `user_${Date.now()}`, createdAt: new Date().toISOString().split('T')[0] };
         setUsers(prev => [...prev, newUser]);
         toast.success('Пользователь создан');
         resolve(newUser.id);
@@ -337,41 +185,107 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const toggleUserStatus = useCallback(async (userId: string): Promise<boolean> => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        setUsers(prev => prev.map(u => {
-          if (u.id === userId) {
-            const newStatus = u.status === 'active' ? 'blocked' : 'active';
-            toast.success(newStatus === 'active' ? 'Пользователь разблокирован' : 'Пользователь заблокирован');
-            return { ...u, status: newStatus };
-          }
-          return u;
-        }));
+        setUsers(prev => prev.map(u => u.id === userId ? { ...u, status: u.status === 'active' ? 'blocked' : 'active' } : u));
+        toast.success('Статус изменён');
         resolve(true);
       }, 500);
     });
   }, []);
 
-  // Trainer actions
-  const updateTrainer = useCallback((trainerId: string, updates: Partial<Trainer>) => {
-    setTrainers(prev => prev.map(t => 
-      t.id === trainerId ? { ...t, ...updates } : t
-    ));
-    toast.success('Данные тренера обновлены');
+  const addTrainer = useCallback(async (trainerData: Omit<Trainer, 'id'>): Promise<string> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const newTrainer: Trainer = { ...trainerData, id: `trainer_${Date.now()}` };
+        setTrainers(prev => [...prev, newTrainer]);
+        toast.success('Тренер добавлен');
+        resolve(newTrainer.id);
+      }, 500);
+    });
   }, []);
 
-  // Promotion actions
+  const updateTrainer = useCallback(async (trainerId: string, updates: Partial<Trainer>): Promise<boolean> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        setTrainers(prev => prev.map(t => t.id === trainerId ? { ...t, ...updates } : t));
+        toast.success('Данные тренера обновлены');
+        resolve(true);
+      }, 500);
+    });
+  }, []);
+
+  const deleteTrainer = useCallback(async (trainerId: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        setTrainers(prev => prev.filter(t => t.id !== trainerId));
+        toast.success('Тренер удалён');
+        resolve(true);
+      }, 500);
+    });
+  }, []);
+
+  const assignClientToTrainer = useCallback(async (trainerId: string, clientId: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        setTrainerClients(prev => ({ ...prev, [trainerId]: [...(prev[trainerId] || []), clientId] }));
+        toast.success('Клиент назначен тренеру');
+        resolve(true);
+      }, 500);
+    });
+  }, []);
+
+  const getTrainerClients = useCallback((trainerId: string): User[] => {
+    const clientIds = trainerClients[trainerId] || [];
+    return users.filter(u => clientIds.includes(u.id) && u.role === 'client');
+  }, [users, trainerClients]);
+
+  const getClientTrainer = useCallback((clientId: string): Trainer | undefined => {
+    const trainerEntry = Object.entries(trainerClients).find(([_, clients]) => clients.includes(clientId));
+    return trainerEntry ? trainers.find(t => t.id === trainerEntry[0]) : undefined;
+  }, [trainerClients, trainers]);
+
+  const addTraining = useCallback(async (trainingData: Omit<Training, 'id' | 'bookedSpots' | 'status'>): Promise<string> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const newTraining: Training = { ...trainingData, id: `training_${Date.now()}`, bookedSpots: 0, status: 'scheduled' };
+        setTrainings(prev => [...prev, newTraining]);
+        toast.success('Тренировка создана');
+        resolve(newTraining.id);
+      }, 500);
+    });
+  }, []);
+
+  const updateTraining = useCallback(async (trainingId: string, updates: Partial<Training>): Promise<boolean> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        setTrainings(prev => prev.map(t => t.id === trainingId ? { ...t, ...updates } : t));
+        toast.success('Тренировка обновлена');
+        resolve(true);
+      }, 500);
+    });
+  }, []);
+
+  const deleteTraining = useCallback(async (trainingId: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        setTrainings(prev => prev.filter(t => t.id !== trainingId));
+        toast.success('Тренировка удалена');
+        resolve(true);
+      }, 500);
+    });
+  }, []);
+
+  const getTrainerTrainings = useCallback((trainerId: string): Training[] => {
+    return trainings.filter(t => t.trainerId === trainerId);
+  }, [trainings]);
+
   const createPromotion = useCallback((promotion: Omit<Promotion, 'id'>) => {
-    const newPromotion: Promotion = {
-      ...promotion,
-      id: `promo_${Date.now()}`,
-    };
+    const newPromotion: Promotion = { ...promotion, id: `promo_${Date.now()}` };
     setPromotions(prev => [...prev, newPromotion]);
     toast.success('Акция создана');
   }, []);
 
   const updatePromotion = useCallback((promotionId: string, updates: Partial<Promotion>) => {
-    setPromotions(prev => prev.map(p => 
-      p.id === promotionId ? { ...p, ...updates } : p
-    ));
+    setPromotions(prev => prev.map(p => p.id === promotionId ? { ...p, ...updates } : p));
     toast.success('Акция обновлена');
   }, []);
 
@@ -380,53 +294,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
     toast.success('Акция удалена');
   }, []);
 
-  // Helper functions
-  const getUserBookings = useCallback((userId: string) => {
-    return bookings.filter(b => b.userId === userId);
-  }, [bookings]);
-
-  const getUserMembership = useCallback((userId: string) => {
-    return memberships.find(m => m.userId === userId && m.status === 'active');
-  }, [memberships]);
-
-  const getTrainingBookings = useCallback((trainingId: string) => {
-    return bookings.filter(b => b.trainingId === trainingId);
-  }, [bookings]);
-
-  const getUserVisits = useCallback((userId: string) => {
-    return visits.filter(v => v.userId === userId);
-  }, [visits]);
+  const getUserBookings = useCallback((userId: string) => bookings.filter(b => b.userId === userId), [bookings]);
+  const getUserMembership = useCallback((userId: string) => memberships.find(m => m.userId === userId && m.status === 'active'), [memberships]);
+  const getTrainingBookings = useCallback((trainingId: string) => bookings.filter(b => b.trainingId === trainingId), [bookings]);
+  const getUserVisits = useCallback((userId: string) => visits.filter(v => v.userId === userId), [visits]);
 
   return (
-    <AppContext.Provider
-      value={{
-        users,
-        memberships,
-        trainings,
-        bookings,
-        visits,
-        purchases,
-        trainers,
-        promotions,
-        createBooking,
-        cancelBooking,
-        updateTrainingStatus,
-        markAttendance,
-        purchaseMembership,
-        updateUser,
-        createUser,
-        deleteUser,
-        toggleUserStatus,
-        updateTrainer,
-        createPromotion,
-        updatePromotion,
-        deletePromotion,
-        getUserBookings,
-        getUserMembership,
-        getTrainingBookings,
-        getUserVisits,
-      }}
-    >
+    <AppContext.Provider value={{
+      users, memberships, trainings, bookings, visits, purchases, trainers, promotions,
+      createBooking, cancelBooking, updateTrainingStatus, markAttendance, purchaseMembership,
+      updateUser, createUser, deleteUser, toggleUserStatus,
+      addTrainer, updateTrainer, deleteTrainer, assignClientToTrainer, getTrainerClients, getClientTrainer,
+      addTraining, updateTraining, deleteTraining, getTrainerTrainings,
+      createPromotion, updatePromotion, deletePromotion,
+      getUserBookings, getUserMembership, getTrainingBookings, getUserVisits,
+    }}>
       {children}
     </AppContext.Provider>
   );
@@ -434,8 +316,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
 export function useApp() {
   const context = useContext(AppContext);
-  if (context === undefined) {
-    throw new Error('useApp must be used within an AppProvider');
-  }
+  if (context === undefined) throw new Error('useApp must be used within an AppProvider');
   return context;
 }

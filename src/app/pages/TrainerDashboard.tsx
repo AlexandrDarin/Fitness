@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import {
   Dumbbell,
@@ -15,6 +16,10 @@ import {
   TrendingUp,
   XCircle,
   Play,
+  Plus,
+  Edit,
+  Trash2,
+  X,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useApp } from "../contexts/AppContext";
@@ -33,15 +38,34 @@ export default function TrainerDashboard() {
     updateTrainingStatus,
     markAttendance,
     users,
+    addTraining,
+    updateTraining,
+    deleteTraining,
+    getTrainerClients,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedTraining, setSelectedTraining] = useState<string | null>(null);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [actionType, setActionType] = useState<'start' | 'complete' | 'cancel' | null>(null);
+  
+  // State для модального окна тренировки
+  const [trainingDialogOpen, setTrainingDialogOpen] = useState(false);
+  const [editingTraining, setEditingTraining] = useState<any>(null);
+  const [trainingForm, setTrainingForm] = useState({
+    title: "",
+    description: "",
+    date: "",
+    time: "",
+    duration: 60,
+    location: "",
+    category: "",
+    maxSpots: 10,
+  });
 
   // Get trainer's trainings
   const trainerTrainings = trainings.filter((t) => t.trainerId === user?.id);
+  const myClients = user ? getTrainerClients(user.id) : [];
 
   // Today's trainings
   const today = new Date().toISOString().split('T')[0];
@@ -100,6 +124,59 @@ export default function TrainerDashboard() {
 
   const handleMarkAttendance = async (bookingId: string, attended: boolean) => {
     await markAttendance(bookingId, attended);
+  };
+
+  // ========== НОВЫЕ ФУНКЦИИ ДЛЯ УПРАВЛЕНИЯ ТРЕНИРОВКАМИ ==========
+  const handleAddTraining = () => {
+    setEditingTraining(null);
+    setTrainingForm({
+      title: "",
+      description: "",
+      date: today,
+      time: "10:00",
+      duration: 60,
+      location: "",
+      category: "",
+      maxSpots: 10,
+    });
+    setTrainingDialogOpen(true);
+  };
+
+  const handleEditTraining = (training: any) => {
+    setEditingTraining(training);
+    setTrainingForm({
+      title: training.title,
+      description: training.description,
+      date: training.date,
+      time: training.time,
+      duration: training.duration,
+      location: training.location,
+      category: training.category,
+      maxSpots: training.maxSpots,
+    });
+    setTrainingDialogOpen(true);
+  };
+
+  const handleSaveTraining = async () => {
+    if (editingTraining) {
+      await updateTraining(editingTraining.id, trainingForm);
+    } else {
+      await addTraining({
+        ...trainingForm,
+        trainerId: user!.id,
+        trainerName: user!.name,
+        type: "group",
+        price: undefined,
+      });
+    }
+    setTrainingDialogOpen(false);
+    setEditingTraining(null);
+  };
+
+  const handleDeleteTraining = async (trainingId: string) => {
+    if (confirm("Удалить тренировку? Это действие нельзя отменить.")) {
+      await deleteTraining(trainingId);
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -193,14 +270,14 @@ export default function TrainerDashboard() {
               )}
             </TabsTrigger>
             <TabsTrigger value="trainings" className="text-red-300 data-[state=active]:bg-green-500 data-[state=active]:text-white">
-              Все тренировки
+              Мои тренировки
             </TabsTrigger>
             <TabsTrigger value="clients" className="text-red-300 data-[state=active]:bg-green-500 data-[state=active]:text-white">
-              Клиенты
+              Мои клиенты
             </TabsTrigger>
           </TabsList>
 
-          {/* Overview Tab */}
+          {/* Overview Tab - без изменений */}
           <TabsContent value="overview" className="space-y-6">
             {/* Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -224,11 +301,11 @@ export default function TrainerDashboard() {
                     <Users className="w-5 h-5 text-green-400" />
                   </div>
                   <h3 className="font-semibold text-red-400">
-                    Всего клиентов
+                    Моих клиентов
                   </h3>
                 </div>
                 <div className="text-3xl font-bold text-green-400">
-                  {nextTraining ? nextTraining.bookedSpots : 0}
+                  {myClients.length}
                 </div>
               </div>
 
@@ -359,7 +436,7 @@ export default function TrainerDashboard() {
             )}
           </TabsContent>
 
-          {/* Schedule Tab */}
+          {/* Schedule Tab - без изменений */}
           <TabsContent value="schedule" className="space-y-6">
             <div className="bg-card rounded-2xl p-6 border border-border">
               <h3 className="font-semibold text-red-400 mb-6">
@@ -504,22 +581,29 @@ export default function TrainerDashboard() {
             </div>
           </TabsContent>
 
-          {/* All Trainings Tab */}
+          {/* My Trainings Tab - НОВЫЙ с CRUD операциями */}
           <TabsContent value="trainings" className="space-y-6">
             <div className="bg-card rounded-2xl p-6 border border-border">
-              <h3 className="font-semibold text-red-400 mb-6">
-                Все предстоящие тренировки
-              </h3>
-              {upcomingTrainings.length > 0 ? (
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="font-semibold text-red-400">Мои тренировки</h3>
+                <Button onClick={handleAddTraining} className="bg-green-500 hover:bg-green-600 text-white">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Создать тренировку
+                </Button>
+              </div>
+              {trainerTrainings.length > 0 ? (
                 <div className="space-y-4">
-                  {upcomingTrainings.map((training) => (
+                  {trainerTrainings.map((training) => (
                     <div
                       key={training.id}
                       className="flex flex-col md:flex-row md:items-center justify-between p-5 bg-secondary rounded-xl gap-4"
                     >
                       <div className="flex-1">
-                        <div className="font-semibold text-red-400 mb-2">
-                          {training.title}
+                        <div className="flex items-center gap-3 mb-2 flex-wrap">
+                          <div className="font-semibold text-red-400 text-lg">
+                            {training.title}
+                          </div>
+                          <StatusBadge status={training.status} />
                         </div>
                         <div className="flex flex-wrap items-center gap-4 text-sm text-red-300">
                           <div className="flex items-center gap-2">
@@ -538,9 +622,27 @@ export default function TrainerDashboard() {
                             {training.bookedSpots} / {training.maxSpots}
                           </div>
                         </div>
+                        <div className="mt-2 text-sm text-red-400 line-clamp-2">
+                          {training.description}
+                        </div>
                       </div>
-                      <div className={`font-semibold ${getStatusColor(training.status)}`}>
-                        {getStatusLabel(training.status)}
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-red-400"
+                          onClick={() => handleEditTraining(training)}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-red-500"
+                          onClick={() => handleDeleteTraining(training.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
                     </div>
                   ))}
@@ -548,52 +650,46 @@ export default function TrainerDashboard() {
               ) : (
                 <EmptyState
                   icon={Calendar}
-                  title="Нет предстоящих тренировок"
-                  description="У вас пока нет запланированных тренировок"
+                  title="Нет тренировок"
+                  description="Создайте свою первую тренировку"
                 />
               )}
             </div>
           </TabsContent>
 
-          {/* Clients Tab */}
+          {/* My Clients Tab - НОВЫЙ (список клиентов тренера) */}
           <TabsContent value="clients" className="space-y-6">
             <div className="bg-card rounded-2xl p-6 border border-border">
-              <h3 className="font-semibold text-red-400 mb-6">
-                Клиенты
-              </h3>
-              <div className="space-y-4">
-                {trainerTrainings.map((training) => {
-                  const participants = getParticipants(training.id);
-                  if (participants.length === 0) return null;
-
-                  return (
-                    <div key={training.id} className="space-y-3">
-                      <div className="font-semibold text-red-400">
-                        {training.title} -{" "}
-                        {format(new Date(training.date), "d MMMM", { locale: ru })}
+              <h3 className="font-semibold text-red-400 mb-6">Мои клиенты</h3>
+              {myClients.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {myClients.map((client) => (
+                    <div
+                      key={client.id}
+                      className="flex items-center justify-between p-4 bg-secondary rounded-xl"
+                    >
+                      <div>
+                        <div className="font-semibold text-red-400 mb-1">
+                          {client.name}
+                        </div>
+                        <div className="text-sm text-red-300">
+                          {client.email}
+                        </div>
+                        <div className="text-sm text-red-300">
+                          {client.phone || "Нет телефона"}
+                        </div>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {participants.map((participant) => (
-                          <div
-                            key={participant.id}
-                            className="flex items-center justify-between p-4 bg-secondary rounded-xl"
-                          >
-                            <div>
-                              <div className="font-semibold text-red-400 mb-1">
-                                {participant.user!.name}
-                              </div>
-                              <div className="text-sm text-red-300">
-                                {participant.user!.email}
-                              </div>
-                            </div>
-                            <StatusBadge status={participant.status} />
-                          </div>
-                        ))}
-                      </div>
+                      <StatusBadge status={client.status} />
                     </div>
-                  );
-                })}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <EmptyState
+                  icon={Users}
+                  title="Нет клиентов"
+                  description="Клиенты появятся после записи на ваши тренировки"
+                />
+              )}
             </div>
           </TabsContent>
         </Tabs>
@@ -622,6 +718,112 @@ export default function TrainerDashboard() {
         variant={actionType === 'cancel' ? 'destructive' : 'default'}
         onConfirm={handleConfirmAction}
       />
+
+      {/* Training Dialog (Create/Edit) - НОВОЕ */}
+      {trainingDialogOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="bg-card rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto border border-border">
+            <div className="sticky top-0 bg-gradient-to-r from-primary/10 to-primary/5 border-b border-border px-6 py-4 flex justify-between items-center">
+              <h2 className="text-xl font-bold text-red-400">
+                {editingTraining ? 'Редактировать тренировку' : 'Новая тренировка'}
+              </h2>
+              <button onClick={() => setTrainingDialogOpen(false)} className="p-1 hover:bg-primary/10 rounded-lg transition">
+                <X className="w-5 h-5 text-red-400" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-red-400 mb-2">Название *</label>
+                <input
+                  type="text"
+                  value={trainingForm.title}
+                  onChange={(e) => setTrainingForm({ ...trainingForm, title: e.target.value })}
+                  className="w-full px-4 py-2 bg-input-background border border-border rounded-lg text-red-400"
+                  placeholder="Функциональный тренинг"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-red-400 mb-2">Описание</label>
+                <textarea
+                  rows={2}
+                  value={trainingForm.description}
+                  onChange={(e) => setTrainingForm({ ...trainingForm, description: e.target.value })}
+                  className="w-full px-4 py-2 bg-input-background border border-border rounded-lg text-red-400 resize-none"
+                  placeholder="Описание тренировки..."
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-red-400 mb-2">Дата *</label>
+                  <input
+                    type="date"
+                    value={trainingForm.date}
+                    onChange={(e) => setTrainingForm({ ...trainingForm, date: e.target.value })}
+                    className="w-full px-4 py-2 bg-input-background border border-border rounded-lg text-red-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-red-400 mb-2">Время *</label>
+                  <input
+                    type="time"
+                    value={trainingForm.time}
+                    onChange={(e) => setTrainingForm({ ...trainingForm, time: e.target.value })}
+                    className="w-full px-4 py-2 bg-input-background border border-border rounded-lg text-red-400"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-red-400 mb-2">Длительность (мин)</label>
+                  <input
+                    type="number"
+                    value={trainingForm.duration}
+                    onChange={(e) => setTrainingForm({ ...trainingForm, duration: parseInt(e.target.value) || 60 })}
+                    className="w-full px-4 py-2 bg-input-background border border-border rounded-lg text-red-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-red-400 mb-2">Макс. мест</label>
+                  <input
+                    type="number"
+                    value={trainingForm.maxSpots}
+                    onChange={(e) => setTrainingForm({ ...trainingForm, maxSpots: parseInt(e.target.value) || 10 })}
+                    className="w-full px-4 py-2 bg-input-background border border-border rounded-lg text-red-400"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-red-400 mb-2">Локация *</label>
+                <input
+                  type="text"
+                  value={trainingForm.location}
+                  onChange={(e) => setTrainingForm({ ...trainingForm, location: e.target.value })}
+                  className="w-full px-4 py-2 bg-input-background border border-border rounded-lg text-red-400"
+                  placeholder="Групповой зал"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-red-400 mb-2">Категория *</label>
+                <input
+                  type="text"
+                  value={trainingForm.category}
+                  onChange={(e) => setTrainingForm({ ...trainingForm, category: e.target.value })}
+                  className="w-full px-4 py-2 bg-input-background border border-border rounded-lg text-red-400"
+                  placeholder="Функциональный тренинг"
+                />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button onClick={handleSaveTraining} className="flex-1 bg-green-500 text-white">
+                  {editingTraining ? 'Сохранить' : 'Создать'}
+                </Button>
+                <Button variant="outline" onClick={() => setTrainingDialogOpen(false)} className="flex-1 text-red-400">
+                  Отмена
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

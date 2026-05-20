@@ -12,6 +12,7 @@ export interface User {
   dateOfBirth?: string;
   createdAt: string;
   status: 'active' | 'inactive' | 'blocked';
+  password?: string; // Добавлено поле для пароля
 }
 
 export interface Membership {
@@ -99,7 +100,7 @@ export interface Promotion {
   image?: string;
 }
 
-// Моковые пользователи
+// Моковые пользователи (с паролями)
 export const mockUsers: User[] = [
   {
     id: '1',
@@ -110,6 +111,7 @@ export const mockUsers: User[] = [
     dateOfBirth: '1990-03-15',
     createdAt: '2025-01-01',
     status: 'active',
+    password: '123456',
   },
   {
     id: '2',
@@ -119,6 +121,7 @@ export const mockUsers: User[] = [
     role: 'trainer',
     createdAt: '2024-06-15',
     status: 'active',
+    password: '123456',
   },
   {
     id: '3',
@@ -128,6 +131,7 @@ export const mockUsers: User[] = [
     role: 'trainer',
     createdAt: '2024-03-10',
     status: 'active',
+    password: '123456',
   },
   {
     id: '4',
@@ -137,15 +141,17 @@ export const mockUsers: User[] = [
     role: 'trainer',
     createdAt: '2024-08-20',
     status: 'active',
+    password: '123456',
   },
   {
     id: '5',
     name: 'Администратор Системы',
-    email: 'admin@ecofitness.com',
+    email: 'admin@WireFitness.com',
     phone: '+7 (495) 100-00-00',
     role: 'admin',
     createdAt: '2024-01-01',
     status: 'active',
+    password: 'admin123',
   },
   {
     id: '6',
@@ -156,6 +162,7 @@ export const mockUsers: User[] = [
     dateOfBirth: '1992-07-22',
     createdAt: '2025-02-15',
     status: 'active',
+    password: '123456',
   },
 ];
 

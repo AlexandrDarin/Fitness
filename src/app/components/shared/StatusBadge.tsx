@@ -1,55 +1,24 @@
-import { cn } from "../ui/utils";
-
 interface StatusBadgeProps {
-  status: 'active' | 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'expired' | 'upcoming' | 'in-progress';
-  className?: string;
+  status: string;
 }
 
-const statusConfig = {
-  active: {
-    label: 'Активный',
-    className: 'bg-primary/10 text-primary',
-  },
-  pending: {
-    label: 'В ожидании',
-    className: 'bg-yellow-500/10 text-yellow-500',
-  },
-  confirmed: {
-    label: 'Подтверждено',
-    className: 'bg-primary/10 text-primary',
-  },
-  cancelled: {
-    label: 'Отменено',
-    className: 'bg-red-500/10 text-red-500',
-  },
-  completed: {
-    label: 'Завершено',
-    className: 'bg-green-500/10 text-green-500',
-  },
-  expired: {
-    label: 'Истекает',
-    className: 'bg-orange-500/10 text-orange-500',
-  },
-  upcoming: {
-    label: 'Предстоящая',
-    className: 'bg-blue-500/10 text-blue-500',
-  },
-  'in-progress': {
-    label: 'Идёт',
-    className: 'bg-purple-500/10 text-purple-500',
-  },
-};
-
-export function StatusBadge({ status, className }: StatusBadgeProps) {
-  const config = statusConfig[status];
-  
-  return (
-    <span className={cn(
-      "px-3 py-1 rounded-full text-xs font-medium",
-      config.className,
-      className
-    )}>
-      {config.label}
-    </span>
-  );
+export function StatusBadge({ status }: StatusBadgeProps) {
+  const getStatusConfig = () => {
+    switch (status) {
+      case 'active': return { label: 'Активен', className: 'bg-green-500/20 text-green-500' };
+      case 'confirmed': return { label: 'Подтверждён', className: 'bg-green-500/20 text-green-500' };
+      case 'scheduled': return { label: 'Запланирован', className: 'bg-blue-500/20 text-blue-500' };
+      case 'ongoing': return { label: 'Идёт', className: 'bg-yellow-500/20 text-yellow-500' };
+      case 'inactive': return { label: 'Неактивен', className: 'bg-gray-500/20 text-gray-400' };
+      case 'blocked': return { label: 'Заблокирован', className: 'bg-red-500/20 text-red-500' };
+      case 'expired': return { label: 'Истёк', className: 'bg-orange-500/20 text-orange-500' };
+      case 'frozen': return { label: 'Заморожен', className: 'bg-blue-500/20 text-blue-500' };
+      case 'completed': return { label: 'Завершён', className: 'bg-green-500/20 text-green-500' };
+      case 'cancelled': return { label: 'Отменён', className: 'bg-red-500/20 text-red-500' };
+      case 'missed': return { label: 'Пропущен', className: 'bg-red-500/20 text-red-500' };
+      default: return { label: status, className: 'bg-gray-500/20 text-gray-400' };
+    }
+  };
+  const config = getStatusConfig();
+  return <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${config.className}`}>{config.label}</span>;
 }

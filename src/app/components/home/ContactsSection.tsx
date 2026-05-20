@@ -40,7 +40,7 @@ export function ContactsSection() {
   };
 
   const handleEmailClick = () => {
-    window.location.href = 'mailto:info@ecofitness.ru';
+    window.location.href = 'mailto:info@Wire Fitness.ru';
   };
 
   return (
@@ -188,10 +188,10 @@ export function ContactsSection() {
                     Email
                   </h3>
                   <a 
-                    href="mailto:info@ecofitness.ru" 
+                    href="mailto:info@Wire Fitness.ru" 
                     className="text-muted-foreground hover:text-primary transition-colors block"
                   >
-                    info@ecofitness.ru
+                    info@Wire Fitness.ru
                   </a>
                   <p className="text-sm text-muted-foreground mt-1">
                     Ответим в течение 24 часов

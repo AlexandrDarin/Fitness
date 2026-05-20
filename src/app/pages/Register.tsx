@@ -4,10 +4,13 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Dumbbell, Loader2 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import { PrivacyModal, OfferModal } from "../components/ui/Modals";
 
 export default function Register() {
   const navigate = useNavigate();
   const { register, isLoading } = useAuth();
+  const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showRules, setShowRules] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -62,28 +65,28 @@ export default function Register() {
           alt="Background"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-background/90"></div>
+        <div className="absolute inset-0 bg-black/80"></div>
       </div>
 
       {/* Register Form */}
       <div className="relative z-10 w-full max-w-md">
-        <div className="bg-card rounded-3xl p-8 md:p-10 border border-border shadow-2xl">
+        <div className="bg-white rounded-3xl p-8 md:p-10 shadow-2xl">
           {/* Logo */}
           <Link to="/" className="flex items-center justify-center gap-3 mb-8">
-            <div className="bg-primary p-3 rounded-xl">
-              <Dumbbell className="w-7 h-7 text-primary-foreground" />
+            <div className="bg-green-600 p-3 rounded-xl">
+              <Dumbbell className="w-7 h-7 text-white" />
             </div>
             <div className="flex flex-col">
-              <span className="text-2xl font-bold text-card-foreground">ECO FITNESS</span>
-              <span className="text-xs text-muted-foreground">Premium Club</span>
+              <span className="text-2xl font-bold text-gray-900">Wire Fitness</span>
+              <span className="text-xs text-gray-500">Premium Club</span>
             </div>
           </Link>
 
           <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold text-card-foreground mb-2">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
               Регистрация
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-gray-600">
               Создайте аккаунт для начала тренировок
             </p>
           </div>
@@ -91,7 +94,7 @@ export default function Register() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm mb-2 text-card-foreground">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Имя *
                 </label>
                 <Input
@@ -102,10 +105,11 @@ export default function Register() {
                   onChange={handleChange}
                   required
                   disabled={isLoading}
+                  className="bg-gray-50 border-gray-300 text-gray-900"
                 />
               </div>
               <div>
-                <label className="block text-sm mb-2 text-card-foreground">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Фамилия *
                 </label>
                 <Input
@@ -116,12 +120,13 @@ export default function Register() {
                   onChange={handleChange}
                   required
                   disabled={isLoading}
+                  className="bg-gray-50 border-gray-300 text-gray-900"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm mb-2 text-card-foreground">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Email *
               </label>
               <Input
@@ -132,11 +137,12 @@ export default function Register() {
                 onChange={handleChange}
                 required
                 disabled={isLoading}
+                className="bg-gray-50 border-gray-300 text-gray-900"
               />
             </div>
 
             <div>
-              <label className="block text-sm mb-2 text-card-foreground">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Телефон *
               </label>
               <Input
@@ -147,11 +153,12 @@ export default function Register() {
                 onChange={handleChange}
                 required
                 disabled={isLoading}
+                className="bg-gray-50 border-gray-300 text-gray-900"
               />
             </div>
 
             <div>
-              <label className="block text-sm mb-2 text-card-foreground">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Пароль *
               </label>
               <Input
@@ -163,6 +170,7 @@ export default function Register() {
                 required
                 disabled={isLoading}
                 minLength={6}
+                className="bg-gray-50 border-gray-300 text-gray-900"
               />
               {errors.password && (
                 <p className="text-sm text-red-500 mt-1">{errors.password}</p>
@@ -170,7 +178,7 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="block text-sm mb-2 text-card-foreground">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Подтвердите пароль *
               </label>
               <Input
@@ -181,6 +189,7 @@ export default function Register() {
                 onChange={handleChange}
                 required
                 disabled={isLoading}
+                className="bg-gray-50 border-gray-300 text-gray-900"
               />
               {errors.confirmPassword && (
                 <p className="text-sm text-red-500 mt-1">{errors.confirmPassword}</p>
@@ -188,20 +197,33 @@ export default function Register() {
             </div>
 
             <div className="flex items-start gap-2 text-sm">
-              <input type="checkbox" className="rounded mt-1" required disabled={isLoading} />
-              <label className="text-muted-foreground">
+              <input type="checkbox" className="rounded mt-1 border-gray-300" required disabled={isLoading} />
+              <label className="text-gray-600">
                 Я согласен с{" "}
-                <a href="#" className="text-primary hover:underline">
+                <button 
+                  type="button"
+                  onClick={() => setShowPrivacy(true)} 
+                  className="text-green-600 hover:underline font-medium"
+                >
                   политикой конфиденциальности
-                </a>{" "}
+                </button>{" "}
                 и{" "}
-                <a href="#" className="text-primary hover:underline">
+                <button 
+                  type="button"
+                  onClick={() => setShowRules(true)} 
+                  className="text-green-600 hover:underline font-medium"
+                >
                   правилами клуба
-                </a>
+                </button>
               </label>
             </div>
 
-            <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
+            <Button 
+              type="submit" 
+              size="lg" 
+              className="w-full bg-green-600 hover:bg-green-700 text-white"
+              disabled={isLoading}
+            >
               {isLoading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin mr-2" />
@@ -214,19 +236,23 @@ export default function Register() {
           </form>
 
           <div className="mt-6 text-center text-sm">
-            <span className="text-muted-foreground">Уже есть аккаунт? </span>
-            <Link to="/login" className="text-primary hover:underline font-semibold">
+            <span className="text-gray-600">Уже есть аккаунт? </span>
+            <Link to="/login" className="text-green-600 hover:underline font-semibold">
               Войти
             </Link>
           </div>
 
-          <div className="mt-8 pt-6 border-t border-border">
-            <Link to="/" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center justify-center">
+          <div className="mt-8 pt-6 border-t border-gray-200">
+            <Link to="/" className="text-sm text-gray-500 hover:text-green-600 transition-colors flex items-center justify-center">
               ← Вернуться на главную
             </Link>
           </div>
         </div>
       </div>
+
+      {/* Модальные окна */}
+      <PrivacyModal isOpen={showPrivacy} onClose={() => setShowPrivacy(false)} />
+      <OfferModal isOpen={showRules} onClose={() => setShowRules(false)} />
     </div>
   );
 }

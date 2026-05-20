@@ -44,7 +44,7 @@ export function Header() {
               <Dumbbell className="w-5 h-5 lg:w-6 lg:h-6 text-primary-foreground" />
             </div>
             <div className="flex flex-col">
-              <span className="text-lg lg:text-xl font-bold text-foreground">ECO FITNESS</span>
+              <span className="text-lg lg:text-xl font-bold text-foreground">Wire Fitness</span>
               <span className="text-[10px] lg:text-xs text-muted-foreground">Premium Club</span>
             </div>
           </Link>

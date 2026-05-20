@@ -41,7 +41,7 @@ export default function Login() {
               <Dumbbell className="w-7 h-7 text-primary-foreground" />
             </div>
             <div className="flex flex-col">
-              <span className="text-2xl font-bold text-card-foreground">ECO FITNESS</span>
+              <span className="text-2xl font-bold text-card-foreground">Wire Fitness</span>
               <span className="text-xs text-muted-foreground">Premium Club</span>
             </div>
           </Link>

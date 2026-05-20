@@ -24,7 +24,7 @@ export function HeroSection({ onScrollToMemberships, onScrollToTour }: HeroSecti
       <div className="absolute inset-0 z-0">
         <img
           src="https://images.unsplash.com/photo-1766031263281-43cdaa6e624a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBmaXRuZXNzJTIwY2x1YiUyMGV4dGVyaW9yJTIwYnVpbGRpbmd8ZW58MXx8fHwxNzc1MDY3NjY2fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
-          alt="Фасад ECO FITNESS"
+          alt="Фасад Wire Fitness"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-background/90 via-background/70 to-background"></div>
@@ -58,7 +58,7 @@ export function HeroSection({ onScrollToMemberships, onScrollToTour }: HeroSecti
 
           <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto">
             Современное оборудование, профессиональные тренеры и индивидуальный подход. 
-            Достигайте целей вместе с ECO FITNESS.
+            Достигайте целей вместе с Wire Fitness.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">

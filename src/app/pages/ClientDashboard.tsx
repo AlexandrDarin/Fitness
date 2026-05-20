@@ -186,7 +186,7 @@ export default function ClientDashboard() {
               </div>
               <div className="flex flex-col">
                 <span className="font-bold text-card-foreground">
-                  ECO FITNESS
+                  Wire Fitness
                 </span>
                 <span className="text-xs text-muted-foreground">
                   Личный кабинет

@@ -43,43 +43,43 @@ export function PurchaseMembershipModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg bg-white">
         <DialogHeader>
-          <DialogTitle>Покупка абонемента</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-gray-900">Покупка абонемента</DialogTitle>
+          <DialogDescription className="text-gray-500">
             Подтвердите покупку выбранного абонемента
           </DialogDescription>
         </DialogHeader>
         
-        <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl p-6 border-2 border-primary/20">
+        <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 border-2 border-green-200">
           <div className="mb-6">
-            <h3 className="text-2xl font-bold text-card-foreground mb-2">
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">
               {membership.name}
             </h3>
             <div className="flex items-baseline gap-2">
-              <span className="text-4xl font-bold text-primary">
+              <span className="text-4xl font-bold text-green-600">
                 {membership.price.toLocaleString()} ₽
               </span>
-              <span className="text-muted-foreground">/ {membership.duration}</span>
+              <span className="text-gray-500">/ {membership.duration}</span>
             </div>
           </div>
 
           <div className="space-y-3">
             {membership.features.map((feature, index) => (
               <div key={index} className="flex items-start gap-3">
-                <div className="bg-primary/20 rounded-full p-1 mt-0.5">
-                  <Check className="w-3 h-3 text-primary" />
+                <div className="bg-green-200 rounded-full p-1 mt-0.5">
+                  <Check className="w-3 h-3 text-green-700" />
                 </div>
-                <span className="text-sm text-card-foreground">{feature}</span>
+                <span className="text-sm text-gray-700">{feature}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground">
+        <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-600">
           <p>
             После подтверждения покупки с вашей карты будет списана сумма{' '}
-            <span className="font-semibold text-foreground">
+            <span className="font-semibold text-gray-900">
               {membership.price.toLocaleString()} ₽
             </span>
           </p>
@@ -90,14 +90,14 @@ export function PurchaseMembershipModal({
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isLoading}
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto text-gray-700 border-gray-300"
           >
             Отмена
           </Button>
           <Button
             onClick={handlePurchase}
             disabled={isLoading}
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
           >
             {isLoading ? (
               <>

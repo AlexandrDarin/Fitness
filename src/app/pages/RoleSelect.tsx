@@ -63,7 +63,7 @@ export default function RoleSelect() {
               <Dumbbell className="w-7 h-7 text-primary-foreground" />
             </div>
             <div className="flex flex-col">
-              <span className="text-2xl font-bold text-foreground">ECO FITNESS</span>
+              <span className="text-2xl font-bold text-foreground">Wire Fitness</span>
               <span className="text-xs text-muted-foreground">Premium Club</span>
             </div>
           </Link>

@@ -20,7 +20,7 @@ export function Footer() {
                 <Dumbbell className="w-5 h-5 text-primary-foreground" />
               </div>
               <div className="flex flex-col">
-                <span className="font-bold text-foreground">ECO FITNESS</span>
+                <span className="font-bold text-foreground">Wire Fitness</span>
                 <span className="text-xs text-muted-foreground">Premium Club</span>
               </div>
             </Link>
@@ -102,8 +102,8 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-primary shrink-0" />
-                <a href="mailto:info@ecofitness.ru" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  info@ecofitness.ru
+                <a href="mailto:info@wirefitness.ru" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  info@wirefitness.ru
                 </a>
               </li>
             </ul>
@@ -113,7 +113,7 @@ export function Footer() {
         <div className="mt-12 pt-8 border-t border-border">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-muted-foreground">
-              © 2026 ECO FITNESS. Все права защищены.
+              © 2026 Wire Fitness. Все права защищены.
             </p>
             <div className="flex items-center gap-6">
               <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">

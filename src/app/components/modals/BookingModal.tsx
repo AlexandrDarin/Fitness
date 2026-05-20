@@ -40,42 +40,42 @@ export function BookingModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-white">
         <DialogHeader>
-          <DialogTitle>Подтверждение записи</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-gray-900">Подтверждение записи</DialogTitle>
+          <DialogDescription className="text-gray-500">
             Вы записываетесь на тренировку
           </DialogDescription>
         </DialogHeader>
         
-        <div className="bg-secondary rounded-xl p-6 space-y-4">
+        <div className="bg-gray-50 rounded-xl p-6 space-y-4">
           <div>
-            <h3 className="font-semibold text-lg text-card-foreground mb-2">
+            <h3 className="font-semibold text-lg text-gray-900 mb-2">
               {training.title}
             </h3>
           </div>
           
           <div className="space-y-3 text-sm">
-            <div className="flex items-center gap-3 text-muted-foreground">
+            <div className="flex items-center gap-3 text-gray-600">
               <User className="w-4 h-4" />
               <span>Тренер: {training.trainer}</span>
             </div>
-            <div className="flex items-center gap-3 text-muted-foreground">
+            <div className="flex items-center gap-3 text-gray-600">
               <Calendar className="w-4 h-4" />
               <span>{training.date}</span>
             </div>
-            <div className="flex items-center gap-3 text-muted-foreground">
+            <div className="flex items-center gap-3 text-gray-600">
               <Clock className="w-4 h-4" />
               <span>{training.time}</span>
             </div>
-            <div className="flex items-center gap-3 text-muted-foreground">
+            <div className="flex items-center gap-3 text-gray-600">
               <MapPin className="w-4 h-4" />
               <span>{training.location}</span>
             </div>
             {training.spots !== undefined && (
-              <div className="bg-primary/10 rounded-lg p-3 mt-4">
-                <div className="text-xs text-muted-foreground mb-1">Свободно мест</div>
-                <div className="text-lg font-bold text-primary">{training.spots}</div>
+              <div className="bg-green-50 rounded-lg p-3 mt-4">
+                <div className="text-xs text-gray-500 mb-1">Свободно мест</div>
+                <div className="text-lg font-bold text-green-600">{training.spots}</div>
               </div>
             )}
           </div>
@@ -86,14 +86,14 @@ export function BookingModal({
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isLoading}
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto text-gray-700 border-gray-300"
           >
             Отмена
           </Button>
           <Button
             onClick={handleConfirm}
             disabled={isLoading}
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
           >
             {isLoading ? (
               <>

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { calculateKBJU } from '../utils/kbju.calculator';
 
 export function AddEntryModal({ product, onClose, onSave }: any) {
   const [grams, setGrams] = useState(100);
@@ -6,13 +7,21 @@ export function AddEntryModal({ product, onClose, onSave }: any) {
 
   if (!product) return null;
 
+  // 👇 РАСЧЕТ ИНТЕРАКТИВНОГО ПРЕДПРОСМОТРА КБЖУ НА ЛЕТУ ПРИ СМЕНЕ ВЕСА!
+  const preview = calculateKBJU({
+    caloriesPer100g: parseFloat(product.calories_per_100g || product.caloriesPer100g || 0),
+    proteinsPer100g: parseFloat(product.proteins_per_100g || product.proteinsPer100g || 0),
+    fatsPer100g: parseFloat(product.fats_per_100g || product.fatsPer100g || 0),
+    carbsPer100g: parseFloat(product.carbs_per_100g || product.carbsPer100g || 0)
+  }, grams);
+
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200 p-4">
       <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200">
         <h2 className="text-2xl font-bold text-white mb-2">{product.name}</h2>
         <p className="text-slate-400 mb-6 text-sm">Укажите вес порции и прием пищи</p>
 
-        <div className="space-y-5 mb-8">
+        <div className="space-y-5 mb-6">
           <div>
             <label className="block text-slate-400 text-sm font-semibold mb-2">Масса (в граммах)</label>
             <input 
@@ -35,6 +44,26 @@ export function AddEntryModal({ product, onClose, onSave }: any) {
               <option value="dinner">🥗 Ужин</option>
               <option value="snack">🍎 Перекус</option>
             </select>
+          </div>
+        </div>
+
+        {/* 👇 КРАСИВЫЙ БЛОК ПРЕДПРОСМОТРА КБЖУ В РЕАЛЬНОМ ВРЕМЕНИ */}
+        <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-700/50 grid grid-cols-4 gap-2 text-center mb-8">
+          <div>
+            <div className="text-[10px] text-slate-500 uppercase font-bold">Ккал</div>
+            <div className="text-base font-extrabold text-white font-mono mt-0.5">{preview.calories}</div>
+          </div>
+          <div>
+            <div className="text-[10px] text-slate-500 uppercase font-bold">Белки</div>
+            <div className="text-base font-extrabold text-emerald-400 font-mono mt-0.5">{preview.proteins}г</div>
+          </div>
+          <div>
+            <div className="text-[10px] text-slate-500 uppercase font-bold">Жиры</div>
+            <div className="text-base font-extrabold text-amber-400 font-mono mt-0.5">{preview.fats}г</div>
+          </div>
+          <div>
+            <div className="text-[10px] text-slate-500 uppercase font-bold">Углев.</div>
+            <div className="text-base font-extrabold text-sky-400 font-mono mt-0.5">{preview.carbs}г</div>
           </div>
         </div>
 

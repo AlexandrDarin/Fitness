@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useKBJU } from '../store/kbjuContext';
+import { Sparkles } from 'lucide-react';
 
 export function GoalSettings() {
   const { goal, updateGoal } = useKBJU();
@@ -10,6 +11,25 @@ export function GoalSettings() {
     carbs: goal.carbs,
   });
 
+  useEffect(() => {
+    setForm({
+      calories: goal.calories,
+      proteins: goal.proteins,
+      fats: goal.fats,
+      carbs: goal.carbs,
+    });
+  }, [goal]);
+
+  // 👇 ПРЕСЕТЫ ПОД РАЗНЫЕ ЦЕЛИ
+  const applyPreset = (preset: 'loss' | 'gain' | 'balance') => {
+    const presets = {
+      loss: { calories: 1600, proteins: 130, fats: 50, carbs: 160 },
+      gain: { calories: 2700, proteins: 160, fats: 80, carbs: 335 },
+      balance: { calories: 2000, proteins: 120, fats: 67, carbs: 230 },
+    };
+    setForm(presets[preset]);
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     await updateGoal(form);
@@ -18,7 +38,20 @@ export function GoalSettings() {
   return (
     <form onSubmit={handleSave} className="space-y-5 max-w-md mx-auto py-4 animate-in fade-in duration-300">
       <h2 className="text-xl font-bold text-white mb-2">Настройка суточных лимитов</h2>
-      <p className="text-sm text-slate-400 mb-6">Укажите ваши целевые нормы питательных веществ на день</p>
+      <p className="text-sm text-slate-400 mb-6">Укажите ваши целевые нормы или воспользуйтесь быстрыми пресетами</p>
+
+      {/* Быстрые пресеты */}
+      <div className="grid grid-cols-3 gap-2 mb-6">
+        <button type="button" onClick={() => applyPreset('loss')} className="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 py-2.5 rounded-xl text-xs font-bold border border-rose-500/20 transition-all flex items-center justify-center gap-1">
+          <Sparkles className="w-3.5 h-3.5" /> Похудение
+        </button>
+        <button type="button" onClick={() => applyPreset('gain')} className="bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 py-2.5 rounded-xl text-xs font-bold border border-amber-500/20 transition-all flex items-center justify-center gap-1">
+          <Sparkles className="w-3.5 h-3.5" /> Набор массы
+        </button>
+        <button type="button" onClick={() => applyPreset('balance')} className="bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 py-2.5 rounded-xl text-xs font-bold border border-sky-500/20 transition-all flex items-center justify-center gap-1">
+          <Sparkles className="w-3.5 h-3.5" /> Баланс
+        </button>
+      </div>
 
       <div className="space-y-4">
         <div>

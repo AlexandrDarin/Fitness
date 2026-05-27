@@ -6,7 +6,7 @@ exports.register = async (req, res) => {
     console.log(`Попытка регистрации: ${name} (${email})`); 
     
     const { rows } = await db.query(
-      `INSERT INTO users (name, email, password, role, phone) VALUES ($1, $2, $3, $4, $5) RETURNING id, name, email, role, phone, status, created_at as "createdAt"`,
+      `INSERT INTO users (name, email, password, role, phone) VALUES ($1, $2, $3, $4, $5) RETURNING id, name, email, role, phone, status, weight, height, created_at as "createdAt"`,
       [name, email, password, role || 'client', phone || '']
     );
     
@@ -24,7 +24,7 @@ exports.login = async (req, res) => {
     console.log(`Попытка входа: ${email}`);
     
     const { rows } = await db.query(
-      `SELECT id, name, email, phone, role, status, created_at as "createdAt" FROM users WHERE email = $1 AND password = $2`, 
+      `SELECT id, name, email, phone, role, status, weight, height, created_at as "createdAt" FROM users WHERE email = $1 AND password = $2`, 
       [email, password]
     );
     
@@ -55,10 +55,10 @@ exports.updateRole = async (req, res) => {
 
 exports.updateProfile = async (req, res) => {
   try {
-    const { id, name, email, phone } = req.body;
+    const { id, name, email, phone, weight, height } = req.body;
     const { rows } = await db.query(
-      `UPDATE users SET name = $1, email = $2, phone = $3 WHERE id = $4 RETURNING id, name, email, phone, role`,
-      [name, email, phone, id]
+      `UPDATE users SET name = $1, email = $2, phone = $3, weight = $4, height = $5 WHERE id = $6 RETURNING id, name, email, phone, role, status, weight, height, created_at as "createdAt"`,
+      [name, email, phone, parseFloat(weight || 0), parseFloat(height || 0), id]
     );
     console.log("✅ Профиль обновлен:", name);
     res.json(rows[0]);
@@ -72,7 +72,6 @@ exports.deleteProfile = async (req, res) => {
   try {
     const { id } = req.params;
     await db.query(`DELETE FROM users WHERE id = $1`, [id]);
-    console.log("✅ Профиль удален, ID:", id);
     res.json({ success: true });
   } catch (error) {
     console.error("❌ ОШИБКА УДАЛЕНИЯ ПРОФИЛЯ:", error.message);
@@ -80,11 +79,10 @@ exports.deleteProfile = async (req, res) => {
   }
 };
 
-// 👇 ПОЛУЧИТЬ ВСЕХ ЮЗЕРОВ ИЗ БД
 exports.getUsers = async (req, res) => {
   try {
     const { rows } = await db.query(
-      `SELECT id, name, email, phone, role, status, created_at as "createdAt" FROM users ORDER BY id ASC`
+      `SELECT id, name, email, phone, role, status, weight, height, created_at as "createdAt" FROM users ORDER BY id ASC`
     );
     res.json(rows);
   } catch (error) {
@@ -93,7 +91,6 @@ exports.getUsers = async (req, res) => {
   }
 };
 
-// 👇 ИЗМЕНИТЬ СТАТУС (БЛОКИРОВКА/РАЗБЛОКИРОВКА)
 exports.toggleStatus = async (req, res) => {
   try {
     const { id } = req.body;
@@ -103,7 +100,7 @@ exports.toggleStatus = async (req, res) => {
     );
     res.json({ success: true, status: rows[0].status });
   } catch (error) {
-    console.error("❌ ОШИБКА ИЗМЕНЕНИЯ СТАТУСА:", error.message);
+    console.error("❌ Ошибка изменения статуса:", error.message);
     res.status(500).json({ error: 'Ошибка сервера' });
   }
 };

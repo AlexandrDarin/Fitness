@@ -7,20 +7,22 @@ CREATE TABLE IF NOT EXISTS users (
   phone VARCHAR(20),
   role VARCHAR(20) DEFAULT 'client',
   status VARCHAR(20) DEFAULT 'active',
+  weight DECIMAL(5,2) DEFAULT 75.0,
+  height DECIMAL(5,2) DEFAULT 180.0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Тестовые пользователи для показа
-INSERT INTO users (name, email, password, role, phone, status) VALUES 
-('Иван Иванов', 'ivan@example.com', '123456', 'client', '+7 (495) 123-45-67', 'active'),
-('Мария Петрова', 'maria@example.com', '123456', 'trainer', '+7 (495) 234-56-78', 'active'),
-('Алексей Смирнов', 'alex@example.com', '123456', 'trainer', '+7 (495) 345-67-89', 'active'),
-('Елена Волкова', 'elena@example.com', '123456', 'trainer', '+7 (495) 456-78-90', 'active'),
-('Администратор Системы', 'admin@WireFitness.com', 'admin123', 'admin', '+7 (495) 100-00-00', 'active'),
-('Анна Соколова', 'anna@example.com', '123456', 'client', '+7 (495) 567-89-01', 'active')
+INSERT INTO users (name, email, password, role, phone, status, weight, height) VALUES 
+('Иван Иванов', 'ivan@example.com', '123456', 'client', '+7 (495) 123-45-67', 'active', 78.5, 182),
+('Мария Петрова', 'maria@example.com', '123456', 'trainer', '+7 (495) 234-56-78', 'active', 55.0, 168),
+('Алексей Смирнов', 'alex@example.com', '123456', 'trainer', '+7 (495) 345-67-89', 'active', 95.0, 188),
+('Елена Волкова', 'elena@example.com', '123456', 'trainer', '+7 (495) 456-78-90', 'active', 52.0, 164),
+('Администратор Системы', 'admin@WireFitness.com', 'admin123', 'admin', '+7 (495) 100-00-00', 'active', 80.0, 180),
+('Анна Соколова', 'anna@example.com', '123456', 'client', '+7 (495) 567-89-01', 'active', 60.0, 170)
 ON CONFLICT DO NOTHING;
 
--- 2. Тренеры (для витрины сайта)
+-- 2. Тренеры
 CREATE TABLE IF NOT EXISTS trainers (
   id SERIAL PRIMARY KEY,
   name VARCHAR(200) NOT NULL,
@@ -40,15 +42,15 @@ INSERT INTO trainers (id, name, email, phone, specialization, experience, rating
 (4, 'Елена Волкова', 'elena@wirefitness.ru', '+7 (495) 456-78-90', ARRAY['Йога', 'Пилатес', 'Стретчинг'], 6, 4.9, 'Сертифицированный инструктор по йоге.', 'active')
 ON CONFLICT DO NOTHING;
 
--- 3. Связующая таблица Тренер-Клиент (многие-ко-многим) — ТЕПЕРЬ ССЫЛАЕТСЯ НА USERS ДЛЯ КЛИЕНТОВ И ТРЕНЕРОВ!
+-- 3. Связующая таблица Тренер-Клиент (многие-ко-многим)
 CREATE TABLE IF NOT EXISTS trainer_clients (
   trainer_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   client_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   PRIMARY KEY (trainer_id, client_id)
 );
 
--- Привязка клиентов к тренерам (Мария Петрова id=2, Алексей Смирнов id=3, Иван Иванов id=1, Анна Соколова id=6)
-INSERT INTO trainer_clients (trainer_id, client_id) VALUES (2, 1), (2, 6), (3, 1) ON CONFLICT DO NOTHING;
+-- Привязка клиентов к тренерам
+INSERT INTO trainer_clients (trainer_id, client_id) VALUES (2, 1), (2, 6), (3, 1);
 
 -- 4. Абонементы
 CREATE TABLE IF NOT EXISTS memberships (
@@ -62,7 +64,7 @@ CREATE TABLE IF NOT EXISTS memberships (
   price INT NOT NULL
 );
 
--- 5. Расписание тренировок
+-- 5. Расписание тренировок (Сразу привязываем к реальным ID тренеров 2, 3, 4!)
 CREATE TABLE IF NOT EXISTS trainings (
   id SERIAL PRIMARY KEY,
   title VARCHAR(200) NOT NULL,
@@ -81,14 +83,13 @@ CREATE TABLE IF NOT EXISTS trainings (
   price INT
 );
 
--- Наполняем расписание тренировок (Мария Петрова id=2, Алексей Смирнов id=3, Елена Волкова id=4)
+-- Наполняем расписание тренировок (с реальными ID!)
 INSERT INTO trainings (title, description, trainer_id, trainer_name, date, time, duration, location, type, category, max_spots, booked_spots)
 VALUES 
 ('Функциональный тренинг', 'Комплексная тренировка для развития силы, выносливости и координации.', 2, 'Мария Петрова', CURRENT_DATE, '18:00', 60, 'Групповой зал', 'group', 'Групповые', 15, 0),
 ('Йога', 'Практика асан для гибкости, баланса и внутренней гармонии.', 4, 'Елена Волкова', CURRENT_DATE + 1, '19:00', 90, 'Зал йоги', 'group', 'Йога', 20, 0),
 ('HIIT тренировка', 'Высокоинтенсивная интервальная тренировка для жиросжигания.', 2, 'Мария Петрова', CURRENT_DATE + 2, '17:00', 45, 'Групповой зал', 'group', 'Кардио', 15, 0),
-('Силовая тренировка', 'Работа с весами для набора качественной мышечной массы.', 3, 'Алексей Смирнов', CURRENT_DATE + 2, '11:00', 90, 'Тренажёрный зал', 'group', 'Силовые', 10, 0)
-ON CONFLICT DO NOTHING;
+('Силовая тренировка', 'Работа с весами для набора качественной мышечной массы.', 3, 'Алексей Смирнов', CURRENT_DATE + 2, '11:00', 90, 'Тренажёрный зал', 'group', 'Силовые', 10, 0);
 
 -- 6. Бронирования (Записи на занятия)
 CREATE TABLE IF NOT EXISTS bookings (
@@ -137,10 +138,21 @@ CREATE TABLE IF NOT EXISTS promotions (
 -- Наполняем акции
 INSERT INTO promotions (title, description, discount, valid_from, valid_until, status) VALUES
 ('Весенняя скидка 20%', 'Скидка 20% на все абонементы при покупке до конца апреля', 20, CURRENT_DATE, CURRENT_DATE + 30, 'active'),
-('Приведи друга', 'Приведи друга и получите оба скидку 15% на следующий месяц', 15, CURRENT_DATE, CURRENT_DATE + 60, 'active')
-ON CONFLICT DO NOTHING;
+('Приведи друга', 'Приведи друга и получите оба скидку 15% на следующий месяц', 15, CURRENT_DATE, CURRENT_DATE + 60, 'active');
 
--- 10. Твои таблицы (КБЖУ)
+-- 10. Силовые тренировки КБЖУ (УПРОЩЕННЫЙ ВАРИАНТ БЕЗ ПОДХОДОВ - ТОЛЬКО КАТЕГОРИИ, ВРЕМЯ И КАЛОРИИ!)
+CREATE TABLE IF NOT EXISTS user_workouts (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  category VARCHAR(100) NOT NULL, -- Кардио | Силовая | Йога | Единоборства | Бассейн
+  activity_name VARCHAR(200) NOT NULL, -- Название упражнения
+  duration_minutes INT NOT NULL DEFAULT 30, -- Время в минутах
+  burned_calories INT NOT NULL, -- Сожженные ккал
+  date DATE NOT NULL DEFAULT CURRENT_DATE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 11. Твои таблицы (КБЖУ)
 CREATE TABLE IF NOT EXISTS products (
   id SERIAL PRIMARY KEY,
   name VARCHAR(200) NOT NULL,
@@ -171,7 +183,15 @@ CREATE TABLE IF NOT EXISTS kbju_goals (
 INSERT INTO products (name, calories_per_100g, proteins_per_100g, fats_per_100g, carbs_per_100g) 
 VALUES 
 ('Куриная грудка (отварная)', 137, 29.8, 1.8, 0),
-('Яйцо куриное (1 шт)', 157, 12.7, 11.5, 0.7),
-('Овсянка на воде', 88, 3, 1.7, 15),
-('Творог 5%', 121, 17.2, 5, 1.8),
-('Банан', 95, 1.5, 0.2, 21.8);
+('Куриное филе (запеченное)', 150, 30.1, 3.2, 0),
+('Куриная грудка (жареная на масле)', 197, 28.5, 9.2, 0),
+('Куриное бедро (без кожи, отварное)', 170, 25.0, 8.0, 0),
+('Заготовка с Фаршем Индейки', 181, 16.0, 7.3, 20.0),
+('Яйцо куриное (отварное)', 157, 12.7, 11.5, 0.7),
+('Овсянка на воде', 88, 3.0, 1.7, 15.0),
+('Творог 5%', 121, 17.2, 5.0, 1.8),
+('Банан', 95, 1.5, 0.2, 21.8),
+('Кока-Кола (Coca-Cola)', 42, 0, 0, 10.6),
+('Кола Зеро (Coca-Cola Zero)', 0.3, 0, 0, 0),
+('Молоко 2.5% (Домик в деревне)', 53, 3.0, 2.5, 4.7),
+('Бекон Орловский Варено-Копченый', 290, 14.0, 26.0, 0);

@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, ReactNode, useEffect, useCallback } from 'react';
+import { createContext, useContext, useReducer, ReactNode, useEffect, useCallback, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../../../app/contexts/AuthContext';
 import { calculateKBJU, sumKBJU } from '../utils/kbju.calculator';
@@ -7,9 +7,11 @@ import { toast } from 'sonner';
 const KBJUContext = createContext<any>(null);
 
 const API_URL = 'http://localhost:5005/api/kbju'; 
+const API_FITNESS_URL = 'http://localhost:5005/api/fitness';
 
 const initialState = {
   diary: [],
+  workouts: [], 
   goal: { calories: 2000, proteins: 120, fats: 67, carbs: 200 },
   totalKBJU: { calories: 0, proteins: 0, fats: 0, carbs: 0 },
   selectedDate: new Date().toISOString().split('T')[0],
@@ -21,6 +23,7 @@ function reducer(state: any, action: any) {
       return { 
         ...state, 
         diary: action.payload.diary, 
+        workouts: action.payload.workouts, 
         goal: action.payload.goal,
         totalKBJU: sumKBJU(action.payload.diary) 
       };
@@ -34,10 +37,12 @@ function reducer(state: any, action: any) {
 export function KBJUProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [refresh, setRefresh] = useState(0); 
 
   const loadKBJUData = useCallback(async () => {
     if (!user) return;
     try {
+      // 1. Дневник питания
       const dRes = await axios.get(`${API_URL}/diary?userId=${user.id}&date=${state.selectedDate}`);
       const formattedDiary = dRes.data.map((item: any) => ({
         id: item.id,
@@ -49,18 +54,29 @@ export function KBJUProvider({ children }: { children: ReactNode }) {
           proteinsPer100g: item.proteins_per_100g,
           fatsPer100g: item.fats_per_100g,
           carbsPer100g: item.carbs_per_100g
-        }, item.grams)
+        }, Number(item.grams))
       }));
 
+      // 2. Силовые тренировки за день
+      const wRes = await axios.get(`${API_FITNESS_URL}/user-workouts?userId=${user.id}&date=${state.selectedDate}`);
+      const formattedWorkouts = wRes.data.map((w: any) => ({
+        id: w.id,
+        category: w.category,
+        activityName: w.activity_name,
+        durationMinutes: Number(w.duration_minutes),
+        burnedCalories: Number(w.burned_calories)
+      }));
+
+      // 3. Суточные цели
       const gRes = await axios.get(`${API_URL}/goals?userId=${user.id}`);
       const goalData = gRes.data ? {
-        calories: Number(gRes.data.calories),
-        proteins: Number(gRes.data.proteins),
-        fats: Number(gRes.data.fats),
-        carbs: Number(gRes.data.carbs),
+        calories: Number(gRes.data.calories ?? 2000),
+        proteins: Number(gRes.data.proteins ?? 120),
+        fats: Number(gRes.data.fats ?? 67),
+        carbs: Number(gRes.data.carbs ?? 200),
       } : initialState.goal;
 
-      dispatch({ type: 'SET_DATA', payload: { diary: formattedDiary, goal: goalData } });
+      dispatch({ type: 'SET_DATA', payload: { diary: formattedDiary, workouts: formattedWorkouts, goal: goalData } });
     } catch (error) {
       console.error("Ошибка загрузки данных КБЖУ", error);
     }
@@ -68,7 +84,7 @@ export function KBJUProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     loadKBJUData();
-  }, [user, state.selectedDate, loadKBJUData]);
+  }, [user, state.selectedDate, refresh, loadKBJUData]);
 
   const changeDate = (date: string) => {
     dispatch({ type: 'SET_DATE', payload: date });
@@ -84,7 +100,7 @@ export function KBJUProvider({ children }: { children: ReactNode }) {
         meal_type: product.mealType || 'snack',
         date: state.selectedDate
       });
-      loadKBJUData(); 
+      setRefresh(prev => prev + 1); 
       toast.success('Добавлено в дневник!');
     } catch (error) {
       console.error("Ошибка сохранения записи КБЖУ", error);
@@ -108,15 +124,44 @@ export function KBJUProvider({ children }: { children: ReactNode }) {
         userId: user.id,
         ...newGoal
       });
-      loadKBJUData();
+      setRefresh(prev => prev + 1); 
       toast.success('Суточные цели успешно обновлены!');
     } catch (error) {
       console.error("Ошибка обновления целей КБЖУ", error);
     }
   };
 
+  // 👇 ДОБАВИТЬ ТРЕНИРОВКУ КБЖУ В БД (С КАТЕГОРИЯМИ И МИНУТАМИ)
+  const addWorkout = async (category: string, activityName: string, durationMinutes: number, burnedCalories: number) => {
+    if (!user) return;
+    try {
+      await axios.post(`${API_FITNESS_URL}/user-workouts`, {
+        userId: user.id,
+        category,
+        activityName,
+        durationMinutes,
+        burnedCalories,
+        date: state.selectedDate
+      });
+      setRefresh(prev => prev + 1);
+      toast.success('Тренировка записана!');
+    } catch (error) {
+      console.error("Ошибка сохранения тренировки КБЖУ", error);
+    }
+  };
+
+  const removeWorkout = async (id: number) => {
+    try {
+      await axios.delete(`${API_FITNESS_URL}/user-workouts/${id}`);
+      setRefresh(prev => prev + 1);
+      toast.success('Тренировка удалена');
+    } catch (error) {
+      console.error("Ошибка удаления тренировки КБЖУ", error);
+    }
+  };
+
   return (
-    <KBJUContext.Provider value={{ ...state, addEntry, removeEntry, updateGoal, changeDate }}>
+    <KBJUContext.Provider value={{ ...state, addEntry, removeEntry, updateGoal, changeDate, addWorkout, removeWorkout }}>
       {children}
     </KBJUContext.Provider>
   );

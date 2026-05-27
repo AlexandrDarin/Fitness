@@ -11,15 +11,17 @@ interface User {
   role: UserRole;
   phone?: string;
   avatar?: string;
+  weight?: number; // 👇 Добавили вес
+  height?: number; // 👇 Добавили рост
 }
 
 interface AuthContextType {
   user: User | null;
   setUser: (user: User | null) => void;
   login: (email: string, password: string) => Promise<boolean>;
-  register: (name: string, email: string, password: string, phone: string) => Promise<boolean>; // 👈 Исправили тип здесь!
+  register: (name: string, email: string, password: string, phone: string) => Promise<boolean>;
   logout: () => void;
-  updateProfile: (data: { name: string; email: string; phone: string }) => Promise<boolean>;
+  updateProfile: (data: { name: string; email: string; phone: string; weight?: number; height?: number }) => Promise<boolean>; // 👇 Обновили метод
   deleteProfile: () => Promise<boolean>;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -34,7 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const saved = localStorage.getItem('fitness_user');
     if (saved) {
       const parsedUser = JSON.parse(saved);
-      parsedUser.role = null; // Сброс роли при F5 для быстрого показа
+      parsedUser.role = null; 
       return parsedUser;
     }
     return null;
@@ -51,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const response = await axios.post(`${API_URL}/login`, { email, password });
       const realUser = response.data;
-      realUser.role = null; // Сброс роли при входе
+      realUser.role = null; 
 
       setUser(realUser);
       localStorage.setItem('fitness_user', JSON.stringify(realUser));
@@ -81,6 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         role: 'client' 
       });
       const newUser = response.data;
+      newUser.role = null;
 
       setUser(newUser);
       localStorage.setItem('fitness_user', JSON.stringify(newUser));
@@ -94,12 +97,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const updateProfile = async (data: { name: string; email: string; phone: string }) => {
+  const updateProfile = async (data: { name: string; email: string; phone: string; weight?: number; height?: number }) => {
     if (!user) return false;
     setIsLoading(true);
     try {
       const response = await axios.put(`${API_URL}/profile`, { ...data, id: user.id });
-      const updatedUser = { ...user, ...response.data };
+      const updatedUser = response.data;
       setUser(updatedUser);
       localStorage.setItem('fitness_user', JSON.stringify(updatedUser));
       toast.success('Профиль успешно обновлен!');

@@ -258,6 +258,7 @@ exports.deleteTrainer = async (req, res) => {
   }
 };
 
+// 👇 УМНЫЙ SQL ЗАПРОС: Автоматически находит всех клиентов, записанных к тренеру!
 exports.getTrainerClients = async (req, res) => {
   try {
     const { id } = req.params;
@@ -328,6 +329,50 @@ exports.deletePromotion = async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     console.error("❌ Ошибка deletePromotion:", error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// ==================== ПОЛЬЗОВАТЕЛЬСКИЕ ТРЕНИРОВКИ КБЖУ ====================
+exports.getUserWorkouts = async (req, res) => {
+  try {
+    const { userId, date } = req.query;
+    const targetDate = date || new Date().toISOString().split('T')[0];
+    const { rows } = await db.query(
+      `SELECT * FROM user_workouts WHERE user_id = $1 AND date = $2 ORDER BY created_at DESC`,
+      [parseInt(userId), targetDate]
+    );
+    res.json(rows);
+  } catch (error) {
+    console.error("❌ Ошибка getUserWorkouts:", error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.addUserWorkout = async (req, res) => {
+  try {
+    const { userId, category, activityName, durationMinutes, burnedCalories, date } = req.body;
+    const targetDate = date || new Date().toISOString().split('T')[0];
+    
+    const { rows } = await db.query(`
+      INSERT INTO user_workouts (user_id, category, activity_name, duration_minutes, burned_calories, date)
+      VALUES ($1, $2, $3, $4, $5, $6) RETURNING *
+    `, [parseInt(userId), category, activityName, parseInt(durationMinutes), parseInt(burnedCalories), targetDate]);
+    
+    res.status(201).json(rows[0]);
+  } catch (error) {
+    console.error("❌ Ошибка addUserWorkout:", error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.deleteUserWorkout = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await db.query(`DELETE FROM user_workouts WHERE id = $1`, [parseInt(id)]);
+    res.json({ success: true });
+  } catch (error) {
+    console.error("❌ Ошибка deleteUserWorkout:", error.message);
     res.status(500).json({ error: error.message });
   }
 };

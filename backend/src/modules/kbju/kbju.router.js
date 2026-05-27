@@ -8,5 +8,6 @@ router.post('/diary', kbjuController.addDiaryEntry);
 router.delete('/diary/:id', kbjuController.removeDiaryEntry);
 router.get('/goals', kbjuController.getGoals);
 router.put('/goals', kbjuController.updateGoals);
+router.get('/stats/weekly', kbjuController.getWeeklyStats); // 👈 Добавили путь аналитики!
 
 module.exports = router;

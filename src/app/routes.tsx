@@ -8,6 +8,9 @@ import TrainerDashboard from "./pages/TrainerDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
+// 👇 Исправленный путь (две точки в начале)
+import { KBJUPage } from '../modules/kbju/pages/KBJUPage';
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -24,6 +27,11 @@ export const router = createBrowserRouter([
   {
     path: "/role-select",
     Component: RoleSelect,
+  },
+  // 👇 Добавили твой маршрут сюда!
+  {
+    path: "/kbju",
+    Component: KBJUPage,
   },
   {
     path: "/client",

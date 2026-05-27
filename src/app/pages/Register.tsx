@@ -42,7 +42,7 @@ export default function Register() {
     }
 
     const fullName = `${formData.firstName} ${formData.lastName}`;
-    const success = await register(fullName, formData.email, formData.password);
+    const success = await register(fullName, formData.email, formData.password, formData.phone);
     
     if (success) {
       navigate("/role-select");

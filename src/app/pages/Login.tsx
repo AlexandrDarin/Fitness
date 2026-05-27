@@ -16,6 +16,7 @@ export default function Login() {
     
     const success = await login(email, password);
     if (success) {
+      // Для презентации: после логина ВСЕГДА идем на выбор роли!
       navigate("/role-select");
     }
   };

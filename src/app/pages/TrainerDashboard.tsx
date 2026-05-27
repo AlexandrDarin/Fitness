@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import {
   Dumbbell,
@@ -63,8 +62,8 @@ export default function TrainerDashboard() {
     maxSpots: 10,
   });
 
-  // Get trainer's trainings
-  const trainerTrainings = trainings.filter((t) => t.trainerId === user?.id);
+  // 👇 ИСПРАВЛЕНО: Безопасное сравнение типов через приведение к строке!
+  const trainerTrainings = trainings.filter((t) => String(t.trainerId) === String(user?.id));
   const myClients = user ? getTrainerClients(user.id) : [];
 
   // Today's trainings
@@ -91,7 +90,7 @@ export default function TrainerDashboard() {
       .filter((b) => b.status === 'confirmed')
       .map((booking) => ({
         ...booking,
-        user: users.find((u) => u.id === booking.userId),
+        user: users.find((u) => String(u.id) === String(booking.userId)), // Сравнение строк
       }))
       .filter((b) => b.user);
   };
@@ -126,7 +125,6 @@ export default function TrainerDashboard() {
     await markAttendance(bookingId, attended);
   };
 
-  // ========== НОВЫЕ ФУНКЦИИ ДЛЯ УПРАВЛЕНИЯ ТРЕНИРОВКАМИ ==========
   const handleAddTraining = () => {
     setEditingTraining(null);
     setTrainingForm({
@@ -277,7 +275,7 @@ export default function TrainerDashboard() {
             </TabsTrigger>
           </TabsList>
 
-          {/* Overview Tab - без изменений */}
+          {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
             {/* Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -348,18 +346,18 @@ export default function TrainerDashboard() {
                     </div>
                     <div className="flex flex-wrap items-center gap-4 text-sm text-red-300">
                       <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4" />
+                        <Clock className="w-4 h-4 text-green-400" />
                         {format(new Date(nextTraining.date), "d MMMM yyyy", {
                           locale: ru,
                         })}
                         , {nextTraining.time}
                       </div>
                       <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4" />
+                        <MapPin className="w-4 h-4 text-green-400" />
                         {nextTraining.location}
                       </div>
                       <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4" />
+                        <Users className="w-4 h-4 text-green-400" />
                         {nextTraining.bookedSpots} / {nextTraining.maxSpots} человек
                       </div>
                     </div>
@@ -436,7 +434,7 @@ export default function TrainerDashboard() {
             )}
           </TabsContent>
 
-          {/* Schedule Tab - без изменений */}
+          {/* Schedule Tab */}
           <TabsContent value="schedule" className="space-y-6">
             <div className="bg-card rounded-2xl p-6 border border-border">
               <h3 className="font-semibold text-red-400 mb-6">
@@ -581,7 +579,7 @@ export default function TrainerDashboard() {
             </div>
           </TabsContent>
 
-          {/* My Trainings Tab - НОВЫЙ с CRUD операциями */}
+          {/* My Trainings Tab */}
           <TabsContent value="trainings" className="space-y-6">
             <div className="bg-card rounded-2xl p-6 border border-border">
               <div className="flex items-center justify-between mb-6">
@@ -657,7 +655,7 @@ export default function TrainerDashboard() {
             </div>
           </TabsContent>
 
-          {/* My Clients Tab - НОВЫЙ (список клиентов тренера) */}
+          {/* My Clients Tab */}
           <TabsContent value="clients" className="space-y-6">
             <div className="bg-card rounded-2xl p-6 border border-border">
               <h3 className="font-semibold text-red-400 mb-6">Мои клиенты</h3>
@@ -719,7 +717,7 @@ export default function TrainerDashboard() {
         onConfirm={handleConfirmAction}
       />
 
-      {/* Training Dialog (Create/Edit) - НОВОЕ */}
+      {/* Training Dialog (Create/Edit) */}
       {trainingDialogOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
           <div className="bg-card rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto border border-border">

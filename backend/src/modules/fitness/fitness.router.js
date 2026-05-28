@@ -33,9 +33,12 @@ router.post('/promotions', fitnessController.createPromotion);
 router.put('/promotions/:id', fitnessController.updatePromotion);
 router.delete('/promotions/:id', fitnessController.deletePromotion);
 
+<<<<<<< HEAD
 // Пользовательские тренировки КБЖУ (Подходы)
 router.get('/user-workouts', fitnessController.getUserWorkouts);
 router.post('/user-workouts', fitnessController.addUserWorkout);
 router.delete('/user-workouts/:id', fitnessController.deleteUserWorkout);
 
+=======
+>>>>>>> 76ad5ad406f60de07e05bda58a7f824a44f50e14
 module.exports = router;

@@ -19,12 +19,15 @@ function KBJUWidgetInner() {
   const [activeTab, setActiveTab] = useState('diary');
   const [profileModalOpen, setProfileModalOpen] = useState(false); 
 
+<<<<<<< HEAD
   // Получаем абонемент из базы данных
   const membership = user ? getUserMembership(user.id) : undefined;
   const membershipName = membership 
     ? (membership.type === 'premium' ? '★ Премиум' : membership.type === 'vip' ? '👑 VIP' : '🎫 Базовый') 
     : 'Нет абонемента';
 
+=======
+>>>>>>> 76ad5ad406f60de07e05bda58a7f824a44f50e14
   const handlePrevDay = () => {
     const d = new Date(selectedDate);
     d.setDate(d.getDate() - 1);
@@ -37,7 +40,10 @@ function KBJUWidgetInner() {
     changeDate(d.toISOString().split('T')[0]);
   };
 
+<<<<<<< HEAD
   // 👇 МГНОВЕННЫЙ ВОЗВРАТ НА СЕГОДНЯШНИЙ ДЕНЬ ПРИ КЛИКЕ НА ДАТУ
+=======
+>>>>>>> 76ad5ad406f60de07e05bda58a7f824a44f50e14
   const handleResetToToday = () => {
     changeDate('2026-05-27');
   };
@@ -54,10 +60,33 @@ function KBJUWidgetInner() {
   return (
     <div className="max-w-6xl mx-auto p-4 md:p-8 font-sans">
       
+<<<<<<< HEAD
       {/* 📅 СБАЛАНСИРОВАННАЯ ШАПКА: Профиль слева, Календарь справа (БЕЗ ДВОЙНЫХ ДАТ!) */}
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-10 pb-4 border-b border-slate-800">
         
         {/* 👇 КОМПАКТНЫЙ ПРОФИЛЬ: ТОЛЬКО ИКОНКА И ИМЯ! */}
+=======
+      <style>{`
+        /* Скрываем системную браузерную иконку календаря */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+          background: transparent;
+          bottom: 0;
+          color: transparent;
+          cursor: pointer;
+          height: auto;
+          left: 0;
+          position: absolute;
+          right: 0;
+          top: 0;
+          width: auto;
+        }
+      `}</style>
+
+      {/* 📅 СБАЛАНСИРОВАННАЯ ШАПКА: Профиль слева, Календарь справа (БЕЗ ДВОЙНЫХ ДАТ!) */}
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-10 pb-4 border-b border-slate-800">
+        
+        {/* Компактный профиль */}
+>>>>>>> 76ad5ad406f60de07e05bda58a7f824a44f50e14
         <div 
           onClick={() => setProfileModalOpen(true)}
           className="flex items-center gap-3 cursor-pointer hover:text-blue-400 transition-all group"
@@ -75,6 +104,7 @@ function KBJUWidgetInner() {
           </div>
         </div>
 
+<<<<<<< HEAD
         {/* Календарь переключения дней */}
         <div className="flex items-center gap-2 bg-slate-900/60 p-2 rounded-xl border border-slate-700/50">
           <button onClick={handlePrevDay} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition">
@@ -86,13 +116,40 @@ function KBJUWidgetInner() {
             <span>{formatShowDate(selectedDate)}</span>
             <span className="text-[10px] text-slate-500 font-normal">({selectedDate})</span>
           </div>
+=======
+        {/* Календарь переключения дней (Клик по дате возвращает на сегодня!) */}
+        <div className="flex items-center gap-2 bg-slate-900/60 p-2 rounded-xl border border-slate-700/50 relative">
+          <button onClick={handlePrevDay} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition">
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          
+          <div className="flex items-center gap-1.5 hover:text-blue-400 transition font-bold text-white text-xs cursor-pointer px-2">
+            <Calendar className="w-3.5 h-3.5 text-blue-400" />
+            <span onClick={handleResetToToday}>{formatShowDate(selectedDate)}</span>
+          </div>
+
+          <div className="relative flex items-center justify-center">
+            {/* Скрытый системный выбор даты накладывается поверх текста */}
+            <input 
+              type="date" 
+              value={selectedDate} 
+              onChange={(e) => changeDate(e.target.value)}
+              className="bg-transparent border-none text-slate-500 focus:outline-none cursor-pointer font-sans w-20 text-xs"
+            />
+          </div>
+
+>>>>>>> 76ad5ad406f60de07e05bda58a7f824a44f50e14
           <button onClick={handleNextDay} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition">
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       </div>
 
+<<<<<<< HEAD
       {/* 👇 ОТДЕЛЬНАЯ КНОПКА ВОЗВРАТА НА СЕГОДНЯ, если выбран другой день */}
+=======
+      {/* 👇 УДОБНАЯ ПЛАШКА СБРОСА ДАТЫ, если выбран не сегодняшний день */}
+>>>>>>> 76ad5ad406f60de07e05bda58a7f824a44f50e14
       {selectedDate !== '2026-05-27' && (
         <div 
           onClick={handleResetToToday}
@@ -105,9 +162,15 @@ function KBJUWidgetInner() {
       {/* 👇 ДВУХКОЛОНОЧНЫЙ МАКЕТ */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         
+<<<<<<< HEAD
         {/* Левая колонка (Дневник, Поиск, Статистика) */}
         <div className="lg:col-span-2 space-y-6">
           {/* 👇 УВЕЛИЧЕННЫЙ И БОЛЕЕ СТИЛЬНЫЙ ТУМБЛЕР ПЕРЕКЛЮЧЕНИЯ */}
+=======
+        {/* Левая колонка */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Крупный тумблер переключения КБЖУ / Тренировки */}
+>>>>>>> 76ad5ad406f60de07e05bda58a7f824a44f50e14
           <div className="flex bg-slate-900/90 p-2.5 rounded-2xl border border-slate-800 w-full shadow-2xl">
             <button 
               onClick={() => setActiveModule('kbju')}

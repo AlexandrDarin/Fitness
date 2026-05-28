@@ -29,8 +29,13 @@ export function DailySummary() {
 
   const totalBurned = visitsBurned + workoutsBurned;
   
+<<<<<<< HEAD
   // 👇 ИСПРАВЛЕНО: Осталось = Цель - Съедено (потраченные калории выводятся отдельно и не добавляются к лимиту пищи!)
   const remainingCalories = Math.max(0, goal.calories - totalKBJU.calories);
+=======
+  // Формула дефицита: Осталось = Цель - Съедено + Сожжено
+  const remainingCalories = Math.max(0, goal.calories - totalKBJU.calories + totalBurned);
+>>>>>>> 76ad5ad406f60de07e05bda58a7f824a44f50e14
 
   const nutrients = [
     { key: 'proteins', label: 'Белки',    unit: 'г',    color: 'bg-emerald-400' },

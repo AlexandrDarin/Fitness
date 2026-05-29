@@ -49,10 +49,10 @@ export function KBJUProvider({ children }: { children: ReactNode }) {
         grams: item.grams,
         mealType: item.meal_type,
         kbju: calculateKBJU({
-          caloriesPer100g: item.calories_per_100g,
-          proteinsPer100g: item.proteins_per_100g,
-          fatsPer100g: item.fats_per_100g,
-          carbsPer100g: item.carbs_per_100g
+          caloriesPer100g: parseFloat(item.calories_per_100g || 0),
+          proteinsPer100g: parseFloat(item.proteins_per_100g || 0),
+          fatsPer100g: parseFloat(item.fats_per_100g || 0),
+          carbsPer100g: parseFloat(item.carbs_per_100g || 0)
         }, Number(item.grams))
       }));
 
@@ -98,6 +98,7 @@ export function KBJUProvider({ children }: { children: ReactNode }) {
         date: state.selectedDate
       });
       setRefresh(prev => prev + 1); 
+      toast.success('Добавлено в дневник!');
     } catch (error) {
       console.error("Ошибка сохранения записи КБЖУ", error);
     }
@@ -107,6 +108,7 @@ export function KBJUProvider({ children }: { children: ReactNode }) {
     try {
       await axios.delete(`${API_URL}/diary/${entryId}`);
       setRefresh(prev => prev + 1);
+      toast.success('Запись удалена');
     } catch (error) {
       console.error("Ошибка удаления записи КБЖУ", error);
     }
@@ -120,6 +122,7 @@ export function KBJUProvider({ children }: { children: ReactNode }) {
         ...newGoal
       });
       setRefresh(prev => prev + 1); 
+      toast.success('Суточные цели успешно обновлены!');
     } catch (error) {
       console.error("Ошибка обновления целей КБЖУ", error);
     }
@@ -137,6 +140,7 @@ export function KBJUProvider({ children }: { children: ReactNode }) {
         date: state.selectedDate
       });
       setRefresh(prev => prev + 1);
+      toast.success('Тренировка записана!');
     } catch (error) {
       console.error("Ошибка сохранения тренировки КБЖУ", error);
     }
@@ -146,17 +150,17 @@ export function KBJUProvider({ children }: { children: ReactNode }) {
     try {
       await axios.delete(`${API_FITNESS_URL}/user-workouts/${id}`);
       setRefresh(prev => prev + 1);
+      toast.success('Упражнение удалено');
     } catch (error) {
       console.error("Ошибка удаления тренировки КБЖУ", error);
     }
   };
 
+  // 👇 ИСПРАВЛЕНО: УБРАНА БЕСКОНЕЧНАЯ ПЕТЛЯ РЕНДЕРИНГА!
   return (
-    <KBJUProvider>
-      <KBJUContext.Provider value={{ ...state, addEntry, removeEntry, updateGoal, changeDate, addWorkout, removeWorkout }}>
-        {children}
-      </KBJUContext.Provider>
-    </KBJUProvider>
+    <KBJUContext.Provider value={{ ...state, addEntry, removeEntry, updateGoal, changeDate, addWorkout, removeWorkout }}>
+      {children}
+    </KBJUContext.Provider>
   );
 }
 

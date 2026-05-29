@@ -19,143 +19,114 @@ function KBJUWidgetInner() {
   const [activeTab, setActiveTab] = useState('diary');
   const [profileModalOpen, setProfileModalOpen] = useState(false); 
 
-  // Получаем абонемент из базы данных
   const membership = user ? getUserMembership(user.id) : undefined;
   const membershipName = membership 
-    ? (membership.type === 'premium' ? '★ Премиум' : membership.type === 'vip' ? '👑 VIP' : '🎫 Базовый') 
+    ? (membership.type === 'premium' ? '★ Премиум' : '🎫 Базовый') 
     : 'Нет абонемента';
 
+  // Получаем сегодня в формате YYYY-MM-DD
+  const today = new Date();
+  const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+  
   const handlePrevDay = () => {
-    const d = new Date(selectedDate);
-    d.setDate(d.getDate() - 1);
+    const d = new Date(selectedDate + 'T12:00:00Z');
+    d.setUTCDate(d.getUTCDate() - 1);
     changeDate(d.toISOString().split('T')[0]);
   };
 
   const handleNextDay = () => {
-    const d = new Date(selectedDate);
-    d.setDate(d.getDate() + 1);
+    const d = new Date(selectedDate + 'T12:00:00Z');
+    d.setUTCDate(d.getUTCDate() + 1);
     changeDate(d.toISOString().split('T')[0]);
   };
 
-  // 👇 МГНОВЕННЫЙ ВОЗВРАТ НА СЕГОДНЯШНИЙ ДЕНЬ ПРИ КЛИКЕ НА ДАТУ
-  const handleResetToToday = () => {
-    changeDate('2026-05-27');
-  };
+  const handleResetToToday = () => changeDate(todayStr);
 
   const formatShowDate = (dStr: string) => {
-    const d = new Date(dStr);
-    const today = '2026-05-27';
-    const yesterday = '2026-05-26';
-    if (dStr === today) return 'Сегодня';
-    if (dStr === yesterday) return 'Вчера';
-    return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+    const d = new Date(dStr + 'T12:00:00Z');
+    const numericDate = d.toLocaleDateString('ru-RU'); // Это даст 29.05.2026
+    if (dStr === todayStr) return `Сегодня (${numericDate})`;
+    return numericDate;
   };
 
   return (
     <div className="max-w-6xl mx-auto p-4 md:p-8 font-sans">
-      
-      {/* 📅 СБАЛАНСИРОВАННАЯ ШАПКА: Профиль слева, Календарь справа (БЕЗ ДВОЙНЫХ ДАТ!) */}
+      <style>{`
+        input[type="date"]::-webkit-calendar-picker-indicator {
+          background: transparent;
+          bottom: 0;
+          color: transparent;
+          cursor: pointer;
+          height: auto;
+          left: 0;
+          position: absolute;
+          right: 0;
+          top: 0;
+          width: auto;
+        }
+      `}</style>
+
+      {/* 📅 ШАПКА */}
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-10 pb-4 border-b border-slate-800">
         
-        {/* 👇 КОМПАКТНЫЙ ПРОФИЛЬ: ТОЛЬКО ИКОНКА И ИМЯ! */}
-        <div 
-          onClick={() => setProfileModalOpen(true)}
-          className="flex items-center gap-3 cursor-pointer hover:text-blue-400 transition-all group"
-          title="Параметры здоровья и абонемент"
-        >
-          <div className="bg-blue-500/10 w-11 h-11 rounded-full flex items-center justify-center border border-blue-500/20 group-hover:scale-105 transition-transform">
+        {/* ПРОФИЛЬ СЛЕВА */}
+        <div onClick={() => setProfileModalOpen(true)} className="flex items-center gap-3 cursor-pointer hover:text-blue-400 transition-all group">
+          <div className="bg-blue-500/10 w-10 h-10 rounded-full flex items-center justify-center border border-blue-500/20 group-hover:scale-105 transition-transform">
             <User className="w-5 h-5 text-blue-400" />
           </div>
           <div>
-            <h2 className="text-md font-bold text-white leading-tight flex items-center gap-1.5">
+            <h2 className="text-sm font-bold text-white flex items-center gap-1">
               {user?.name || 'Гость'}
               <span className="text-[10px] font-normal text-slate-500">• Подробно</span>
             </h2>
-            <p className="text-xs text-slate-400 mt-1">Клиент Wire Fitness</p>
+            <p className="text-[11px] text-slate-400">{membershipName}</p>
           </div>
         </div>
 
-        {/* Календарь переключения дней */}
-        <div className="flex items-center gap-2 bg-slate-900/60 p-2 rounded-xl border border-slate-700/50">
-          <button onClick={handlePrevDay} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition">
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-          {/* 👇 Иконка и текст кликабельны и возвращают на сегодня */}
-          <div onClick={handleResetToToday} className="flex items-center gap-1.5 hover:text-blue-400 transition font-bold text-white text-xs cursor-pointer px-2" title="Вернуться на сегодня">
-            <Calendar className="w-3.5 h-3.5 text-blue-400" />
-            <span>{formatShowDate(selectedDate)}</span>
-            <span className="text-[10px] text-slate-500 font-normal">({selectedDate})</span>
+        {/* КАЛЕНДАРЬ СПРАВА */}
+        <div className="flex items-center gap-1 bg-slate-900/60 p-1.5 rounded-xl border border-slate-700/50 relative">
+          <button onClick={handlePrevDay} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-400 transition"><ChevronLeft className="w-4 h-4" /></button>
+          
+          <div className="flex items-center gap-2 px-3 min-w-[160px] justify-center relative hover:bg-slate-800/50 rounded-lg py-1 transition cursor-pointer">
+            <Calendar className="w-4 h-4 text-blue-400" />
+            <span className="text-xs font-bold text-white whitespace-nowrap">
+              {formatShowDate(selectedDate)}
+            </span>
+            <input 
+              type="date" 
+              value={selectedDate} 
+              onChange={(e) => changeDate(e.target.value)}
+              className="absolute inset-0 opacity-0 cursor-pointer"
+            />
           </div>
-          <button onClick={handleNextDay} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition">
-            <ChevronRight className="w-4 h-4" />
-          </button>
+
+          <button onClick={handleNextDay} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-400 transition"><ChevronRight className="w-4 h-4" /></button>
         </div>
       </div>
 
-      {/* 👇 ОТДЕЛЬНАЯ КНОПКА ВОЗВРАТА НА СЕГОДНЯ, если выбран другой день */}
-      {selectedDate !== '2026-05-27' && (
-        <div 
-          onClick={handleResetToToday}
-          className="bg-blue-500/10 border border-blue-500/20 p-3 rounded-xl text-center text-xs text-blue-400 font-bold cursor-pointer hover:bg-blue-500/20 transition-all mb-6"
-        >
-          📅 Вы просматриваете историю за прошлый день. Нажмите сюда, чтобы вернуться на Сегодня (27.05.2026)
+      {/* ПЛАШКА СБРОСА (появляется только если не сегодня) */}
+      {selectedDate !== todayStr && (
+        <div onClick={handleResetToToday} className="bg-blue-500/10 border border-blue-500/20 p-3 rounded-xl text-center text-xs text-blue-400 font-bold cursor-pointer hover:bg-blue-500/20 transition-all mb-6 animate-in fade-in slide-in-from-top-2">
+          📅 Вернуться на Сегодня ({today.toLocaleDateString('ru-RU')})
         </div>
       )}
 
-      {/* 👇 ДВУХКОЛОНОЧНЫЙ МАКЕТ */}
+      {/* ОСНОВНОЙ КОНТЕНТ */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        
-        {/* Левая колонка (Дневник, Поиск, Статистика) */}
         <div className="lg:col-span-2 space-y-6">
-          {/* 👇 УВЕЛИЧЕННЫЙ И БОЛЕЕ СТИЛЬНЫЙ ТУМБЛЕР ПЕРЕКЛЮЧЕНИЯ */}
-          <div className="flex bg-slate-900/90 p-2.5 rounded-2xl border border-slate-800 w-full shadow-2xl">
-            <button 
-              onClick={() => setActiveModule('kbju')}
-              className={`flex-1 py-4.5 rounded-xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2 ${
-                activeModule === 'kbju' 
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/30' 
-                  : 'text-slate-500 hover:text-slate-300'
-              }`}
-            >
-              Счётчик КБЖУ 🍎
-            </button>
-            <button 
-              onClick={() => setActiveModule('workout')}
-              className={`flex-1 py-4.5 rounded-xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2 ${
-                activeModule === 'workout' 
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/30' 
-                  : 'text-slate-500 hover:text-slate-300'
-              }`}
-            >
-              Дневник активности 💪🏻
-            </button>
+          {/* МОДУЛИ */}
+          <div className="flex bg-slate-900/90 p-2 rounded-2xl border border-slate-800 w-full shadow-2xl">
+            <button onClick={() => setActiveModule('kbju')} className={`flex-1 py-3.5 rounded-xl font-bold text-sm transition-all ${activeModule === 'kbju' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}>Счётчик КБЖУ 🍎</button>
+            <button onClick={() => setActiveModule('workout')} className={`flex-1 py-3.5 rounded-xl font-bold text-sm transition-all ${activeModule === 'workout' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}>Активность 💪🏻</button>
           </div>
 
-          {/* Содержимое вкладок КБЖУ */}
-          {activeModule === 'kbju' && (
-            <div className="space-y-6 animate-in fade-in duration-300">
-              {/* Пропорциональные вкладки во всю ширину панели */}
-              <nav className="flex bg-slate-900 p-1.5 rounded-2xl border border-slate-800/80 w-full font-sans">
-                {[
-                  {id: 'diary',  label: 'Дневник'}, 
-                  {id: 'search', label: 'Поиск'}, 
-                  {id: 'stats',  label: 'Статистика'}, 
-                  {id: 'goals',  label: 'Цели'}
-                ].map(tab => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
-                      activeTab === tab.id 
-                        ? 'bg-blue-500 text-white shadow-lg' 
-                        : 'text-slate-500 hover:text-slate-300'
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
+          {activeModule === 'kbju' ? (
+            <div className="space-y-6">
+              <nav className="flex bg-slate-900 p-1 rounded-xl border border-slate-800/50 w-full">
+                {[{id:'diary', label:'Дневник'}, {id:'search', label:'Поиск'}, {id:'stats', label:'Статистика'}, {id:'goals', label:'Цели'}].map(tab => (
+                  <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === tab.id ? 'bg-slate-700 text-white shadow-sm' : 'text-slate-500'}`}>{tab.label}</button>
                 ))}
               </nav>
-
               <div className="bg-slate-800/40 backdrop-blur-xl p-6 rounded-3xl border border-slate-700/50 shadow-2xl min-h-[450px]">
                 {activeTab === 'diary' && <FoodDiary />}
                 {activeTab === 'search' && <FoodSearch />}
@@ -163,33 +134,24 @@ function KBJUWidgetInner() {
                 {activeTab === 'goals' && <GoalSettings />}
               </div>
             </div>
-          )}
-
-          {/* Содержимое вкладок Тренировок */}
-          {activeModule === 'workout' && (
-            <div className="bg-slate-800/40 backdrop-blur-xl p-6 rounded-3xl border border-slate-700/50 shadow-2xl min-h-[450px] animate-in fade-in duration-300">
+          ) : (
+            <div className="bg-slate-800/40 backdrop-blur-xl p-6 rounded-3xl border border-slate-700/50 shadow-2xl min-h-[450px]">
               <WorkoutDiary />
             </div>
           )}
         </div>
 
-        {/* Правая колонка */}
+        {/* СВОДКА СПРАВА */}
         <div className="lg:col-span-1">
           <DailySummary />
         </div>
-
       </div>
 
-      {/* Модальное окно редактирования веса и роста */}
-      <EditBodyParamsModal 
-        isOpen={profileModalOpen} 
-        onClose={() => setProfileModalOpen(false)} 
-      />
+      <EditBodyParamsModal isOpen={profileModalOpen} onClose={() => setProfileModalOpen(false)} />
     </div>
   );
 }
 
-// Внешняя обертка, предоставляющая провайдер
 export function KBJUWidget() {
   return (
     <KBJUProvider>

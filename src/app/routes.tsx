@@ -28,7 +28,11 @@ export const router = createBrowserRouter([
   },
   {
     path: "/kbju",
-    Component: KBJUPage,
+    element: (
+      <ProtectedRoute>
+        <KBJUPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/client",

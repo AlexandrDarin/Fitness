@@ -2,84 +2,63 @@ const swaggerUi = require('swagger-ui-express');
 
 const swaggerDocument = {
   openapi: '3.0.0',
-  info: {
-    title: 'Wire Fitness REST API',
-    version: '1.0.0',
-    description: 'Полная интерактивная спецификация всех эндпоинтов проекта (Распределенный монолит).'
-  },
+  info: { title: 'Wire Fitness API', version: '1.0.0' },
   servers: [{ url: 'http://localhost:5005' }],
   paths: {
-    // ================= AUTH =================
-    '/api/auth/register': { post: { summary: 'Регистрация пользователя', tags: ['🔑 Auth'] } },
-    '/api/auth/login': { post: { summary: 'Вход в систему', tags: ['🔑 Auth'] } },
-    '/api/auth/profile': { put: { summary: 'Обновить профиль (рост, вес, телефон)', tags: ['🔑 Auth'] } },
-    '/api/auth/profile/{id}': { delete: { summary: 'Удалить аккаунт', tags: ['🔑 Auth'], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }] } },
-    '/api/auth/users': { get: { summary: 'Получить всех пользователей (для Админа)', tags: ['🔑 Auth'] } },
-    '/api/auth/status': { put: { summary: 'Заблокировать/разблокировать пользователя', tags: ['🔑 Auth'] } },
-    '/api/auth/role': { put: { summary: 'Изменить роль пользователя', tags: ['🔑 Auth'] } },
-
-    // ================= KBJU =================
-    '/api/kbju/products': { get: { summary: 'Поиск продуктов', tags: ['🍎 КБЖУ (Питание)'] } },
-    '/api/kbju/diary': { 
-      get: { summary: 'Получить дневник за дату', tags: ['🍎 КБЖУ (Питание)'] },
-      post: { summary: 'Добавить продукт в дневник', tags: ['🍎 КБЖУ (Питание)'] }
+    // === AUTH ===
+    '/api/auth/register': {
+      post: { tags: ['🔑 Auth'], summary: 'Регистрация', requestBody: { content: { 'application/json': { schema: { type: 'object', properties: { name: {type: 'string'}, email: {type: 'string'}, password: {type: 'string'}, phone: {type: 'string'} }, example: { name: "Артем", email: "test@mail.ru", password: "123456", phone: "89990000000" } } } } }, responses: { 201: { description: 'OK' } } }
     },
-    '/api/kbju/diary/{id}': { delete: { summary: 'Удалить продукт из дневника', tags: ['🍎 КБЖУ (Питание)'], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }] } },
-    '/api/kbju/goals': { 
-      get: { summary: 'Получить суточные цели КБЖУ', tags: ['🍎 КБЖУ (Питание)'] },
-      put: { summary: 'Обновить цели КБЖУ', tags: ['🍎 КБЖУ (Питание)'] }
+    '/api/auth/login': {
+      post: { tags: ['🔑 Auth'], summary: 'Вход', requestBody: { content: { 'application/json': { schema: { type: 'object', properties: { email: {type: 'string'}, password: {type: 'string'} }, example: { email: "ivan@example.com", password: "123456" } } } } }, responses: { 200: { description: 'OK' } } }
     },
-    '/api/kbju/stats/weekly': { get: { summary: 'Аналитика калорий за неделю', tags: ['🍎 КБЖУ (Питание)'] } },
+    '/api/auth/profile': {
+      put: { tags: ['🔑 Auth'], summary: 'Обновить профиль', requestBody: { content: { 'application/json': { schema: { type: 'object', properties: { id: {type: 'integer'}, name: {type: 'string'}, email: {type: 'string'}, phone: {type: 'string'}, weight: {type: 'number'}, height: {type: 'number'} } } } } }, responses: { 200: { description: 'OK' } } }
+    },
+    '/api/auth/profile/{id}': {
+      delete: { tags: ['🔑 Auth'], summary: 'Удалить аккаунт', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }], responses: { 200: { description: 'OK' } } }
+    },
+    
+    // === KBJU ===
+    '/api/kbju/products': {
+      get: { tags: ['🍎 КБЖУ'], summary: 'Поиск продуктов', parameters: [{ name: 'q', in: 'query', schema: { type: 'string' } }], responses: { 200: { description: 'OK' } } }
+    },
+    '/api/kbju/diary': {
+      get: { tags: ['🍎 КБЖУ'], summary: 'Дневник за дату', parameters: [{ name: 'userId', in: 'query', required: true, schema: { type: 'integer' } }, { name: 'date', in: 'query', schema: { type: 'string' } }], responses: { 200: { description: 'OK' } } },
+      post: { tags: ['🍎 КБЖУ'], summary: 'Добавить еду', requestBody: { content: { 'application/json': { schema: { type: 'object', properties: { userId: {type: 'integer'}, product_id: {type: 'integer'}, grams: {type: 'integer'}, meal_type: {type: 'string'}, date: {type: 'string'} } } } } }, responses: { 201: { description: 'OK' } } }
+    },
+    '/api/kbju/diary/{id}': {
+      delete: { tags: ['🍎 КБЖУ'], summary: 'Удалить запись', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }], responses: { 200: { description: 'OK' } } }
+    },
+    '/api/kbju/goals': {
+      get: { tags: ['🍎 КБЖУ'], summary: 'Получить цели', parameters: [{ name: 'userId', in: 'query', required: true, schema: { type: 'integer' } }], responses: { 200: { description: 'OK' } } },
+      put: { tags: ['🍎 КБЖУ'], summary: 'Обновить цели', requestBody: { content: { 'application/json': { schema: { type: 'object', properties: { userId: {type: 'integer'}, calories: {type: 'number'}, proteins: {type: 'number'}, fats: {type: 'number'}, carbs: {type: 'number'} } } } } }, responses: { 200: { description: 'OK' } } }
+    },
 
-    // ================= FITNESS WORKOUTS =================
+    // === FITNESS ACTIVITY ===
     '/api/fitness/user-workouts': {
-      get: { summary: 'Получить дневник силовых тренировок за день', tags: ['💪 Фитнес (Активность)'] },
-      post: { summary: 'Записать силовую тренировку', tags: ['💪 Фитнес (Активность)'] }
+      get: { tags: ['💪 Активность'], summary: 'Список упражнений', parameters: [{ name: 'userId', in: 'query', required: true, schema: { type: 'integer' } }, { name: 'date', in: 'query', schema: { type: 'string' } }], responses: { 200: { description: 'OK' } } },
+      post: { tags: ['💪 Активность'], summary: 'Записать подход', requestBody: { content: { 'application/json': { schema: { type: 'object', properties: { userId: {type: 'integer'}, category: {type: 'string'}, activityName: {type: 'string'}, durationMinutes: {type: 'integer'}, burnedCalories: {type: 'integer'}, date: {type: 'string'} } } } } }, responses: { 201: { description: 'OK' } } }
     },
-    '/api/fitness/user-workouts/{id}': { delete: { summary: 'Удалить тренировку', tags: ['💪 Фитнес (Активность)'], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }] } },
+    '/api/fitness/user-workouts/{id}': {
+      delete: { tags: ['💪 Активность'], summary: 'Удалить подход', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }], responses: { 200: { description: 'OK' } } }
+    },
 
-    // ================= FITNESS CLUB =================
+    // === FITNESS CLUB ===
     '/api/fitness/trainings': {
-      get: { summary: 'Расписание тренировок клуба', tags: ['🏢 Фитнес-клуб (Управление)'] },
-      post: { summary: 'Добавить тренировку в расписание', tags: ['🏢 Фитнес-клуб (Управление)'] }
-    },
-    '/api/fitness/trainings/{id}': {
-      put: { summary: 'Редактировать тренировку', tags: ['🏢 Фитнес-клуб (Управление)'], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }] },
-      delete: { summary: 'Удалить тренировку', tags: ['🏢 Фитнес-клуб (Управление)'], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }] }
+      get: { tags: ['🏢 Клуб'], summary: 'Расписание' },
+      post: { tags: ['🏢 Клуб'], summary: 'Создать тренировку', requestBody: { content: { 'application/json': { schema: { type: 'object', properties: { title: {type: 'string'}, description: {type: 'string'}, trainerId: {type: 'integer'}, trainerName: {type: 'string'}, date: {type: 'string'}, time: {type: 'string'}, duration: {type: 'integer'}, location: {type: 'string'}, category: {type: 'string'}, maxSpots: {type: 'integer'} } } } } }, responses: { 201: { description: 'OK' } } }
     },
     '/api/fitness/bookings': {
-      get: { summary: 'Получить записи на тренировки', tags: ['🏢 Фитнес-клуб (Управление)'] },
-      post: { summary: 'Записаться на тренировку', tags: ['🏢 Фитнес-клуб (Управление)'] }
+      get: { tags: ['🏢 Клуб'], summary: 'Список записей', parameters: [{ name: 'userId', in: 'query', schema: { type: 'integer' } }], responses: { 200: { description: 'OK' } } },
+      post: { tags: ['🏢 Клуб'], summary: 'Записаться', requestBody: { content: { 'application/json': { schema: { type: 'object', properties: { userId: {type: 'integer'}, trainingId: {type: 'integer'} } } } } }, responses: { 201: { description: 'OK' } } }
     },
-    '/api/fitness/bookings/{id}': { delete: { summary: 'Отменить запись', tags: ['🏢 Фитнес-клуб (Управление)'], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }] } },
-    '/api/fitness/attendance': { put: { summary: 'Отметить присутствие/пропуск', tags: ['🏢 Фитнес-клуб (Управление)'] } },
-    '/api/fitness/visits': { get: { summary: 'История посещений клуба', tags: ['🏢 Фитнес-клуб (Управление)'] } },
-    
+    '/api/fitness/bookings/{id}': {
+      delete: { tags: ['🏢 Клуб'], summary: 'Отменить запись', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }], responses: { 200: { description: 'OK' } } }
+    },
     '/api/fitness/membership': {
-      get: { summary: 'Текущий абонемент', tags: ['💳 Коммерция (Абонементы и Акции)'] },
-      post: { summary: 'Купить абонемент', tags: ['💳 Коммерция (Абонементы и Акции)'] }
-    },
-    '/api/fitness/purchases': { get: { summary: 'История транзакций', tags: ['💳 Коммерция (Абонементы и Акции)'] } },
-    
-    '/api/fitness/promotions': {
-      get: { summary: 'Список акций', tags: ['💳 Коммерция (Абонементы и Акции)'] },
-      post: { summary: 'Создать акцию', tags: ['💳 Коммерция (Абонементы и Акции)'] }
-    },
-    '/api/fitness/promotions/{id}': {
-      put: { summary: 'Редактировать акцию', tags: ['💳 Коммерция (Абонементы и Акции)'], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }] },
-      delete: { summary: 'Удалить акцию', tags: ['💳 Коммерция (Абонементы и Акции)'], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }] }
-    },
-
-    '/api/fitness/trainers': {
-      get: { summary: 'Список тренеров', tags: ['👥 Команда (Тренеры)'] },
-      post: { summary: 'Добавить тренера', tags: ['👥 Команда (Тренеры)'] }
-    },
-    '/api/fitness/trainers/{id}': {
-      put: { summary: 'Редактировать тренера', tags: ['👥 Команда (Тренеры)'], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }] },
-      delete: { summary: 'Удалить тренера', tags: ['👥 Команда (Тренеры)'], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }] }
-    },
-    '/api/fitness/trainers/{id}/clients': { get: { summary: 'Получить клиентов тренера', tags: ['👥 Команда (Тренеры)'], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }] } },
-    '/api/fitness/trainers/assign': { post: { summary: 'Назначить клиента тренеру', tags: ['👥 Команда (Тренеры)'] } }
+      post: { tags: ['🏢 Клуб'], summary: 'Купить абонемент', requestBody: { content: { 'application/json': { schema: { type: 'object', properties: { userId: {type: 'integer'}, type: {type: 'string'} } } } } }, responses: { 201: { description: 'OK' } } }
+    }
   }
 };
 

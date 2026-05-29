@@ -11,8 +11,8 @@ interface User {
   role: UserRole;
   phone?: string;
   avatar?: string;
-  weight?: number; // 👇 Добавили вес
-  height?: number; // 👇 Добавили рост
+  weight?: number;
+  height?: number;
 }
 
 interface AuthContextType {
@@ -21,7 +21,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   register: (name: string, email: string, password: string, phone: string) => Promise<boolean>;
   logout: () => void;
-  updateProfile: (data: { name: string; email: string; phone: string; weight?: number; height?: number }) => Promise<boolean>; // 👇 Обновили метод
+  updateProfile: (data: { name: string; email: string; phone: string; weight?: number; height?: number }) => Promise<boolean>;
   deleteProfile: () => Promise<boolean>;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -32,14 +32,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const API_URL = 'http://localhost:5005/api/auth';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  // 👇 ИСПРАВЛЕНО: Честно читаем юзера из памяти. НИКАКИХ СБРОСОВ РОЛИ!
   const [user, setUser] = useState<User | null>(() => {
     const saved = localStorage.getItem('fitness_user');
-    if (saved) {
-      const parsedUser = JSON.parse(saved);
-      parsedUser.role = null; 
-      return parsedUser;
-    }
-    return null;
+    return saved ? JSON.parse(saved) : null;
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -53,8 +49,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const response = await axios.post(`${API_URL}/login`, { email, password });
       const realUser = response.data;
-      realUser.role = null; 
-
+      
+      // 👇 ИСПРАВЛЕНО: Сохраняем реальную роль из базы данных
       setUser(realUser);
       localStorage.setItem('fitness_user', JSON.stringify(realUser));
       toast.success(`Добро пожаловать, ${realUser.name}!`);
@@ -83,8 +79,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         role: 'client' 
       });
       const newUser = response.data;
-      newUser.role = null;
 
+      // 👇 ИСПРАВЛЕНО: Не сбрасываем роль новому пользователю
       setUser(newUser);
       localStorage.setItem('fitness_user', JSON.stringify(newUser));
       toast.success('Регистрация успешна!');

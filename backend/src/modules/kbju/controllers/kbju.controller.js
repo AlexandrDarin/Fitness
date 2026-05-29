@@ -19,17 +19,10 @@ exports.getDiary = async (req, res) => {
     const targetDate = date || new Date().toISOString().split('T')[0];
     
     const { rows } = await db.query(`
-<<<<<<< HEAD
       SELECT d.id, d.grams, d.meal_type, p.id as product_id, p.name, p.calories_per_100g, p.proteins_per_100g, fats_per_100g, p.carbs_per_100g 
       FROM diary_entries d
       JOIN products p ON d.product_id = p.id
       WHERE d.user_id = $1 AND d.date = $2
-=======
-      SELECT d.id, d.grams, d.meal_type, p.id as product_id, p.name, p.calories_per_100g, p.proteins_per_100g, p.fats_per_100g, p.carbs_per_100g 
-      FROM diary_entries d
-      JOIN products p ON d.product_id = p.id
-      WHERE d.user_id = $1 AND DATE(d.created_at) = $2
->>>>>>> 76ad5ad406f60de07e05bda58a7f824a44f50e14
       ORDER BY d.created_at DESC
     `, [parseInt(userId), targetDate]);
     res.json(rows);
@@ -45,15 +38,9 @@ exports.addDiaryEntry = async (req, res) => {
     const targetDate = date || new Date().toISOString().split('T')[0];
     
     const { rows } = await db.query(
-<<<<<<< HEAD
       `INSERT INTO diary_entries (user_id, product_id, grams, meal_type, date) 
        VALUES ($1, $2, $3, $4, $5) RETURNING *`,
       [parseInt(userId), parseInt(product_id), parseInt(grams), meal_type, targetDate]
-=======
-      `INSERT INTO diary_entries (user_id, product_id, grams, meal_type, created_at) 
-       VALUES ($1, $2, $3, $4, $5::timestamp) RETURNING *`,
-      [parseInt(userId), parseInt(product_id), parseInt(grams), meal_type, targetDate + ' 12:00:00']
->>>>>>> 76ad5ad406f60de07e05bda58a7f824a44f50e14
     );
     res.status(201).json(rows[0]);
   } catch (error) {
@@ -91,11 +78,7 @@ exports.updateGoals = async (req, res) => {
   try {
     const { userId, calories, proteins, fats, carbs } = req.body;
     const uId = parseInt(userId);
-<<<<<<< HEAD
     console.log(`[KBJU] Обновление целей: Калории=${calories}, Belki=${proteins}, Fats=${fats}, Carbs=${carbs}`);
-=======
-    console.log(`[KBJU] Обновление целей: Калории=${calories}, Белки=${proteins}, Жиры=${fats}, Углеводы=${carbs}`);
->>>>>>> 76ad5ad406f60de07e05bda58a7f824a44f50e14
     
     const { rows } = await db.query(`
       INSERT INTO kbju_goals (user_id, calories, proteins, fats, carbs)
@@ -111,33 +94,20 @@ exports.updateGoals = async (req, res) => {
   }
 };
 
-<<<<<<< HEAD
-=======
-// 👇 ПОЛУЧИТЬ АНАЛИТИКУ КАЛОРИЙ ЗА ПОСЛЕДНИЕ 7 ДНЕЙ ИЗ БД
->>>>>>> 76ad5ad406f60de07e05bda58a7f824a44f50e14
 exports.getWeeklyStats = async (req, res) => {
   try {
     const { userId } = req.query;
     const { rows } = await db.query(`
       SELECT 
-<<<<<<< HEAD
         TO_CHAR(d.date, 'YYYY-MM-DD') as date,
-=======
-        TO_CHAR(d.created_at, 'YYYY-MM-DD') as date,
->>>>>>> 76ad5ad406f60de07e05bda58a7f824a44f50e14
         ROUND(SUM(p.calories_per_100g * d.grams / 100)) as calories,
         ROUND(SUM(p.proteins_per_100g * d.grams / 100), 1) as proteins,
         ROUND(SUM(p.fats_per_100g * d.grams / 100), 1) as fats,
         ROUND(SUM(p.carbs_per_100g * d.grams / 100), 1) as carbs
       FROM diary_entries d
       JOIN products p ON d.product_id = p.id
-<<<<<<< HEAD
       WHERE d.user_id = $1 AND d.date >= CURRENT_DATE - INTERVAL '7 days'
       GROUP BY TO_CHAR(d.date, 'YYYY-MM-DD')
-=======
-      WHERE d.user_id = $1 AND d.created_at >= CURRENT_DATE - INTERVAL '7 days'
-      GROUP BY TO_CHAR(d.created_at, 'YYYY-MM-DD')
->>>>>>> 76ad5ad406f60de07e05bda58a7f824a44f50e14
       ORDER BY date ASC
     `, [parseInt(userId)]);
     res.json(rows);

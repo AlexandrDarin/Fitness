@@ -42,10 +42,6 @@ export function KBJUProvider({ children }: { children: ReactNode }) {
   const loadKBJUData = useCallback(async () => {
     if (!user) return;
     try {
-<<<<<<< HEAD
-=======
-      // 1. Дневник питания
->>>>>>> 76ad5ad406f60de07e05bda58a7f824a44f50e14
       const dRes = await axios.get(`${API_URL}/diary?userId=${user.id}&date=${state.selectedDate}`);
       const formattedDiary = dRes.data.map((item: any) => ({
         id: item.id,
@@ -60,10 +56,6 @@ export function KBJUProvider({ children }: { children: ReactNode }) {
         }, Number(item.grams))
       }));
 
-<<<<<<< HEAD
-=======
-      // 2. Силовые тренировки за день
->>>>>>> 76ad5ad406f60de07e05bda58a7f824a44f50e14
       const wRes = await axios.get(`${API_FITNESS_URL}/user-workouts?userId=${user.id}&date=${state.selectedDate}`);
       const formattedWorkouts = wRes.data.map((w: any) => ({
         id: w.id,
@@ -73,10 +65,6 @@ export function KBJUProvider({ children }: { children: ReactNode }) {
         burnedCalories: Number(w.burned_calories)
       }));
 
-<<<<<<< HEAD
-=======
-      // 3. Суточные цели
->>>>>>> 76ad5ad406f60de07e05bda58a7f824a44f50e14
       const gRes = await axios.get(`${API_URL}/goals?userId=${user.id}`);
       const goalData = gRes.data ? {
         calories: Number(gRes.data.calories ?? 2000),
@@ -110,10 +98,6 @@ export function KBJUProvider({ children }: { children: ReactNode }) {
         date: state.selectedDate
       });
       setRefresh(prev => prev + 1); 
-<<<<<<< HEAD
-=======
-      toast.success('Добавлено в дневник!');
->>>>>>> 76ad5ad406f60de07e05bda58a7f824a44f50e14
     } catch (error) {
       console.error("Ошибка сохранения записи КБЖУ", error);
     }
@@ -122,12 +106,7 @@ export function KBJUProvider({ children }: { children: ReactNode }) {
   const removeEntry = async (entryId: number) => {
     try {
       await axios.delete(`${API_URL}/diary/${entryId}`);
-<<<<<<< HEAD
       setRefresh(prev => prev + 1);
-=======
-      loadKBJUData();
-      toast.success('Запись удалена');
->>>>>>> 76ad5ad406f60de07e05bda58a7f824a44f50e14
     } catch (error) {
       console.error("Ошибка удаления записи КБЖУ", error);
     }
@@ -141,19 +120,11 @@ export function KBJUProvider({ children }: { children: ReactNode }) {
         ...newGoal
       });
       setRefresh(prev => prev + 1); 
-<<<<<<< HEAD
-=======
-      toast.success('Суточные цели успешно обновлены!');
->>>>>>> 76ad5ad406f60de07e05bda58a7f824a44f50e14
     } catch (error) {
       console.error("Ошибка обновления целей КБЖУ", error);
     }
   };
 
-<<<<<<< HEAD
-=======
-  // 👇 ДОБАВИТЬ ТРЕНИРОВКУ КБЖУ В БД (С КАТЕГОРИЯМИ И МИНУТАМИ)
->>>>>>> 76ad5ad406f60de07e05bda58a7f824a44f50e14
   const addWorkout = async (category: string, activityName: string, durationMinutes: number, burnedCalories: number) => {
     if (!user) return;
     try {
@@ -166,10 +137,6 @@ export function KBJUProvider({ children }: { children: ReactNode }) {
         date: state.selectedDate
       });
       setRefresh(prev => prev + 1);
-<<<<<<< HEAD
-=======
-      toast.success('Тренировка записана!');
->>>>>>> 76ad5ad406f60de07e05bda58a7f824a44f50e14
     } catch (error) {
       console.error("Ошибка сохранения тренировки КБЖУ", error);
     }
@@ -179,27 +146,17 @@ export function KBJUProvider({ children }: { children: ReactNode }) {
     try {
       await axios.delete(`${API_FITNESS_URL}/user-workouts/${id}`);
       setRefresh(prev => prev + 1);
-<<<<<<< HEAD
-=======
-      toast.success('Тренировка удалена');
->>>>>>> 76ad5ad406f60de07e05bda58a7f824a44f50e14
     } catch (error) {
       console.error("Ошибка удаления тренировки КБЖУ", error);
     }
   };
 
   return (
-<<<<<<< HEAD
     <KBJUProvider>
       <KBJUContext.Provider value={{ ...state, addEntry, removeEntry, updateGoal, changeDate, addWorkout, removeWorkout }}>
         {children}
       </KBJUContext.Provider>
     </KBJUProvider>
-=======
-    <KBJUContext.Provider value={{ ...state, addEntry, removeEntry, updateGoal, changeDate, addWorkout, removeWorkout }}>
-      {children}
-    </KBJUContext.Provider>
->>>>>>> 76ad5ad406f60de07e05bda58a7f824a44f50e14
   );
 }
 

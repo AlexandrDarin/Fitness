@@ -64,11 +64,7 @@ CREATE TABLE IF NOT EXISTS memberships (
   price INT NOT NULL
 );
 
-<<<<<<< HEAD
 -- 5. Расписание тренировок
-=======
--- 5. Расписание тренировок (Сразу привязываем к реальным ID тренеров 2, 3, 4!)
->>>>>>> 76ad5ad406f60de07e05bda58a7f824a44f50e14
 CREATE TABLE IF NOT EXISTS trainings (
   id SERIAL PRIMARY KEY,
   title VARCHAR(200) NOT NULL,
@@ -87,7 +83,6 @@ CREATE TABLE IF NOT EXISTS trainings (
   price INT
 );
 
-<<<<<<< HEAD
 -- Наполняем расписание тренировок
 INSERT INTO trainings (title, description, trainer_name, date, time, duration, location, type, category, max_spots, booked_spots)
 VALUES 
@@ -95,15 +90,6 @@ VALUES
 ('Йога', 'Практика асан для гибкости, баланса и внутренней гармонии.', 'Елена Волкова', CURRENT_DATE + 1, '19:00', 90, 'Зал йоги', 'group', 'Йога', 20, 0),
 ('HIIT тренировка', 'Высокоинтенсивная интервальная тренировка для жиросжигания.', 'Мария Петрова', CURRENT_DATE + 2, '17:00', 45, 'Групповой зал', 'group', 'Кардио', 15, 0),
 ('Силовая тренировка', 'Работа с весами для набора качественной мышечной массы.', 'Алексей Смирнов', CURRENT_DATE + 2, '11:00', 90, 'Тренажёрный зал', 'group', 'Силовые', 10, 0);
-=======
--- Наполняем расписание тренировок (с реальными ID!)
-INSERT INTO trainings (title, description, trainer_id, trainer_name, date, time, duration, location, type, category, max_spots, booked_spots)
-VALUES 
-('Функциональный тренинг', 'Комплексная тренировка для развития силы, выносливости и координации.', 2, 'Мария Петрова', CURRENT_DATE, '18:00', 60, 'Групповой зал', 'group', 'Групповые', 15, 0),
-('Йога', 'Практика асан для гибкости, баланса и внутренней гармонии.', 4, 'Елена Волкова', CURRENT_DATE + 1, '19:00', 90, 'Зал йоги', 'group', 'Йога', 20, 0),
-('HIIT тренировка', 'Высокоинтенсивная интервальная тренировка для жиросжигания.', 2, 'Мария Петрова', CURRENT_DATE + 2, '17:00', 45, 'Групповой зал', 'group', 'Кардио', 15, 0),
-('Силовая тренировка', 'Работа с весами для набора качественной мышечной массы.', 3, 'Алексей Смирнов', CURRENT_DATE + 2, '11:00', 90, 'Тренажёрный зал', 'group', 'Силовые', 10, 0);
->>>>>>> 76ad5ad406f60de07e05bda58a7f824a44f50e14
 
 -- 6. Бронирования (Записи на занятия)
 CREATE TABLE IF NOT EXISTS bookings (
@@ -154,11 +140,7 @@ INSERT INTO promotions (title, description, discount, valid_from, valid_until, s
 ('Весенняя скидка 20%', 'Скидка 20% на все абонементы при покупке до конца апреля', 20, CURRENT_DATE, CURRENT_DATE + 30, 'active'),
 ('Приведи друга', 'Приведи друга и получите оба скидку 15% на следующий месяц', 15, CURRENT_DATE, CURRENT_DATE + 60, 'active');
 
-<<<<<<< HEAD
 -- 10. Силовые тренировки КБЖУ
-=======
--- 10. Силовые тренировки КБЖУ (УПРОЩЕННЫЙ ВАРИАНТ БЕЗ ПОДХОДОВ - ТОЛЬКО КАТЕГОРИИ, ВРЕМЯ И КАЛОРИИ!)
->>>>>>> 76ad5ad406f60de07e05bda58a7f824a44f50e14
 CREATE TABLE IF NOT EXISTS user_workouts (
   id SERIAL PRIMARY KEY,
   user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -170,11 +152,7 @@ CREATE TABLE IF NOT EXISTS user_workouts (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-<<<<<<< HEAD
 -- 11. Твои таблицы (КБЖУ) — ДОБАВИЛИ ЧИСТУЮ КОЛОНКУ DATE!
-=======
--- 11. Твои таблицы (КБЖУ)
->>>>>>> 76ad5ad406f60de07e05bda58a7f824a44f50e14
 CREATE TABLE IF NOT EXISTS products (
   id SERIAL PRIMARY KEY,
   name VARCHAR(200) NOT NULL,
@@ -190,10 +168,7 @@ CREATE TABLE IF NOT EXISTS diary_entries (
   product_id INT REFERENCES products(id),
   grams INT NOT NULL,
   meal_type VARCHAR(50),
-<<<<<<< HEAD
-  date DATE NOT NULL DEFAULT CURRENT_DATE, -- 👈 Чистая колонка даты без часовых поясов!
-=======
->>>>>>> 76ad5ad406f60de07e05bda58a7f824a44f50e14
+  date DATE NOT NULL DEFAULT CURRENT_DATE, 
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

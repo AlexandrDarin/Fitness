@@ -3,14 +3,33 @@ import { Button } from "../components/ui/button";
 import { User, Dumbbell as DumbbellIcon, Shield } from "lucide-react";
 import { Dumbbell } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import axios from 'axios';
 
 export default function RoleSelect() {
   const navigate = useNavigate();
   const { user, setUser } = useAuth();
 
-  const handleRoleSelect = (role: 'client' | 'trainer' | 'admin', path: string) => {
+  const handleRoleSelect = async (role: 'client' | 'trainer' | 'admin', path: string) => {
     if (user) {
-      setUser({ ...user, role });
+      const updatedUser = { ...user, role };
+      
+      // 1. Обновляем состояние React
+      setUser(updatedUser);
+      
+      // 2. Навсегда сохраняем в память браузера (чтобы F5 работал)
+      localStorage.setItem('fitness_user', JSON.stringify(updatedUser));
+
+      // 3. Отправляем в базу данных PostgreSQL (чтобы сохранилось на сервере)
+      try {
+        await axios.put('http://localhost:5005/api/auth/role', { 
+          id: user.id, 
+          role: role 
+        });
+      } catch (error) {
+        console.error("Ошибка сохранения роли в БД:", error);
+      }
+
+      // Переходим на страницу
       navigate(path);
     }
   };

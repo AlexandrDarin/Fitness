@@ -418,10 +418,10 @@ export default function AdminDashboard() {
           {/* MEMBERSHIPS TAB */}
           <TabsContent value="memberships" className="space-y-6">
             <div className="bg-card rounded-2xl p-6 border border-border">
-              <div className="flex items-center justify-between mb-6"><h3 className="font-semibold text-red-400">Активные абонементы</h3><Button className="bg-primary hover:bg-primary/90 text-white"><Plus className="w-4 h-4 mr-2" />Создать абонемент</Button></div>
+              <div className="flex items-center justify-between mb-6"><h3 className="font-semibold text-red-400">Активные абонементы</h3></div>
               <div className="space-y-4">
                 {memberships.map((membership) => {
-                  const memberUser = users.find((u) => u.id === membership.userId);
+                  const memberUser = users.find((u) => String(u.id) === String(membership.userId));
                   return (
                     <div key={membership.id} className="flex flex-col md:flex-row md:items-center justify-between p-5 bg-secondary rounded-xl gap-4">
                       <div className="flex-1">

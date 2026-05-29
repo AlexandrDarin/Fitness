@@ -29,7 +29,7 @@ import { ru } from "date-fns/locale";
 
 export default function ClientDashboard() {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, updateProfile, deleteProfile } = useAuth(); // 👇 Добавили новые функции
   const {
     trainings,
     getUserBookings,
@@ -38,7 +38,6 @@ export default function ClientDashboard() {
     createBooking,
     cancelBooking,
     purchaseMembership,
-    updateUser,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState("overview");
@@ -48,6 +47,7 @@ export default function ClientDashboard() {
   const [selectedMembership, setSelectedMembership] = useState<any>(null);
   const [editProfileModalOpen, setEditProfileModalOpen] = useState(false);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [deleteProfileOpen, setDeleteProfileOpen] = useState(false); // 👇 Окно удаления
   const [bookingToCancel, setBookingToCancel] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -141,10 +141,10 @@ export default function ClientDashboard() {
     }
   };
 
+  // 👇 РЕАЛЬНОЕ СОХРАНЕНИЕ ПРОФИЛЯ В БАЗУ ДАННЫХ
   const handleSaveProfile = async (data: any) => {
     if (!user) return;
-
-    await updateUser(user.id, {
+    await updateProfile({
       name: data.name,
       email: data.email,
       phone: data.phone,
@@ -730,10 +730,20 @@ export default function ClientDashboard() {
                   <div className="text-sm text-muted-foreground mb-1">
                     Роль
                   </div>
-                  <div className="font-semibold text-card-foreground">
-                    Клиент
+                  <div className="font-semibold text-card-foreground text-capitalize">
+                    {user.role === 'client' ? 'Клиент' : user.role === 'trainer' ? 'Тренер' : 'Администратор'}
                   </div>
                 </div>
+              </div>
+              
+              {/* 👇 КНОПКА УДАЛЕНИЯ ПРОФИЛЯ С БАЗЫ ДАННЫХ */}
+              <div className="mt-8 pt-6 border-t border-border flex justify-end">
+                <Button 
+                  variant="destructive" 
+                  onClick={() => setDeleteProfileOpen(true)}
+                >
+                  Удалить аккаунт
+                </Button>
               </div>
             </div>
 
@@ -858,6 +868,18 @@ export default function ClientDashboard() {
         cancelLabel="Нет, оставить"
         variant="destructive"
         onConfirm={handleConfirmCancelBooking}
+      />
+
+      {/* 👇 ДИАЛОГ УДАЛЕНИЯ ПРОФИЛЯ */}
+      <ConfirmDialog
+        open={deleteProfileOpen}
+        onOpenChange={setDeleteProfileOpen}
+        title="Удалить аккаунт?"
+        description="Вы уверены? Все ваши абонементы, записи на тренировки и дневник питания будут удалены навсегда из базы данных."
+        confirmLabel="Да, удалить"
+        cancelLabel="Отмена"
+        variant="destructive"
+        onConfirm={deleteProfile}
       />
     </div>
   );
